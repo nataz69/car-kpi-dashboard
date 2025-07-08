@@ -240,7 +240,7 @@ export default function Home() {
           80%  { left: 90vw;  top:10%;}
           100% { left: 115vw; top:11%; opacity:0.1;}
         }
-        .ground { position: absolute; bottom: 0; left: 0; width: 200%; height: 88px; background: url('/chao-pixel.png') repeat-x bottom; background-size: auto 88px; animation: groundScroll 13s linear infinite; z-index: 2;}
+        .ground { position: absolute; bottom: 0; left: 0; width: 200%; height: 88px; background: url('/chão-pixel.png') repeat-x bottom; background-size: auto 88px; animation: groundScroll 13s linear infinite; z-index: 2;}
         @keyframes groundScroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
         .workers { position: absolute; right:7vw; left: auto; display: flex; align-items: flex-end; gap: 54px; width: 790px; animation: workersScroll 13s linear infinite; z-index: 3;}
         .workers { bottom: 70px; }
@@ -264,7 +264,7 @@ export default function Home() {
           overflow-y: auto;  /* Só o formulário rola! */
           background: #fff;
           border-radius: 12px;
-          padding: 2.2rem 2.1rem 2rem 2.1rem;
+          padding: 2.2rem 2.1rem 3.5rem 2.1rem; /* MAIS espaço embaixo */
           box-shadow: 0 4px 18px #2222  ;
           display: flex; flex-direction: column; align-items: stretch;
           opacity: 0;
@@ -372,6 +372,7 @@ export default function Home() {
           box-shadow: 0 2px 12px #e6000035;
           letter-spacing: 1px;
           transition: background 0.18s, box-shadow 0.18s, transform 0.18s;
+          margin-bottom: 1.8rem; /* para nunca grudar na borda inferior! */
         }
         button[type="submit"]:hover, button[type="submit"]:focus {
           background: #bb0000;
@@ -430,10 +431,14 @@ export default function Home() {
 
         @media (max-width: 600px) {
           .kpi-form {
-            min-width: 96vw;
+            min-width: 97vw;
             max-width: 99vw;
-            max-height: 97vh;
-            padding: 1.2rem 2vw 1.5rem 2vw;
+            max-height: 99vh;
+            padding: 1.2rem 2vw 3.5rem 2vw; /* mais espaço inferior no mobile */
+          }
+          .preview {
+            max-width: 90vw;
+            max-height: 125px; /* preview bem menor no mobile */
           }
         }
       `}
