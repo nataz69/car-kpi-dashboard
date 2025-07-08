@@ -78,7 +78,58 @@ export default function Home() {
 
         {/* FORMULÁRIO MAIS CLEAN E PROFISSIONAL */}
         <div className="form-wrapper">
-          <form className={`kpi-form ${boxVisible ? 'kpi-in' : ''}`} autoComplete="off">
+          <form
+            className={`kpi-form ${boxVisible ? 'kpi-in' : ''}`}
+            autoComplete="off"
+            onSubmit={async (e) => {
+              e.preventDefault();
+              const formData = new FormData(e.target);
+              const file = formData.get('photo');
+              if (!file) {
+                alert("Por favor, selecione uma foto.");
+                return;
+              }
+
+              // Converte imagem para base64
+              const toBase64 = file => new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = reject;
+              });
+
+              const base64 = await toBase64(file);
+              const base64Data = base64.split(',')[1];
+              const photoType = file.type;
+              const photoName = file.name || "painel.jpg";
+
+              // ENVIA para seu Apps Script WebApp
+              const res = await fetch("https://script.google.com/macros/s/AKfycbyEiNs6ttPbr6XPggLIHBqtNCHkgjjITw8-HOI6IpUck8359HWkq4AW8QZgA1sTbDZq/exec", {
+                method: "POST",
+                body: JSON.stringify({
+                  plate: formData.get('plate'),
+                  model: formData.get('model'),
+                  responsible: formData.get('responsible'),
+                  km: formData.get('km'),
+                  photoBase64: base64Data,
+                  photoType,
+                  photoName
+                }),
+                headers: {
+                  "Content-Type": "application/json"
+                }
+              });
+
+              const result = await res.json();
+              if (result.success) {
+                alert("Enviado com sucesso! Foto salva no Drive.");
+                e.target.reset();
+                setPreviewSrc(null);
+              } else {
+                alert("Erro ao enviar: " + result.error);
+              }
+            }}
+          >
             <h1 className="form-title">
               Envio de <span className="red-detail">KPI de KM</span>
             </h1>
@@ -88,7 +139,7 @@ export default function Home() {
                 <input id="plate" name="plate" type="text" required placeholder="ABC-1234"/>
               </div>
               <div className="input-group">
-                <label htmlFor="model">Modelo</label>
+                <label htmlFor="model">Veículo/Modelo</label>
                 <input id="model" name="model" type="text" required placeholder="Ford Cargo"/>
               </div>
               <div className="input-group">
@@ -146,7 +197,6 @@ export default function Home() {
           background-size: contain;
           animation: cloudsMove linear infinite;
           z-index: 1;
-          /* Aplica fade com mask na direita */
           -webkit-mask-image: linear-gradient(90deg, #000 80%, transparent 99%);
           mask-image: linear-gradient(90deg, #000 80%, transparent 99%);
         }
@@ -163,7 +213,7 @@ export default function Home() {
           80%  { left: 90vw;  top:10%;}
           100% { left: 115vw; top:11%; opacity:0.1;}
         }
-        .ground { position: absolute; bottom: 0; left: 0; width: 200%; height: 88px; background: url('/chão-pixel.png') repeat-x bottom; background-size: auto 88px; animation: groundScroll 13s linear infinite; z-index: 2;}
+        .ground { position: absolute; bottom: 0; left: 0; width: 200%; height: 88px; background: url('/chao-pixel.png') repeat-x bottom; background-size: auto 88px; animation: groundScroll 13s linear infinite; z-index: 2;}
         @keyframes groundScroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
         .workers { position: absolute; right:7vw; left: auto; display: flex; align-items: flex-end; gap: 54px; width: 790px; animation: workersScroll 13s linear infinite; z-index: 3;}
         .workers { bottom: 70px; }
