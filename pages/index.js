@@ -4,7 +4,9 @@ import { useState, useEffect } from 'react'
 export default function Home() {
   const [previewSrc, setPreviewSrc] = useState(null)
   const [boxVisible, setBoxVisible] = useState(false)
-
+  const [loading, setLoading] = useState(false);
+  const [statusMsg, setStatusMsg] = useState(null); // { type: "success" | "error", text: "..." }
+  
   useEffect(() => {
     setTimeout(() => setBoxVisible(true), 400)
   }, [])
@@ -83,6 +85,8 @@ export default function Home() {
   autoComplete="off"
   onSubmit={async (e) => {
     e.preventDefault();
+    setLoading(true);
+    setStatusMsg(null);
     const formData = new FormData(e.target);
     const file = formData.get('photo');
     if (!file) {
@@ -111,6 +115,7 @@ export default function Home() {
         model: formData.get('model'),
         responsible: formData.get('responsible'),
         km: formData.get('km'),
+        obra: formData.get('obra'),
         photoBase64: base64Data,
         photoType,
         photoName
@@ -122,11 +127,13 @@ export default function Home() {
 
     const result = await res.json();
     if (result.success) {
-      alert("Enviado com sucesso! Foto salva no Drive.");
+      setLoading(false);
+      setStatusMsg({ type: "success", text: "Enviado com sucesso! Foto salva no Drive." });
       e.target.reset();
       setPreviewSrc(null);
     } else {
-      alert("Erro ao enviar: " + result.error);
+      setLoading(false);
+      setStatusMsg({ type: "error", text: "Erro ao enviar: " + result.error });
     }
   }}
 >
@@ -141,6 +148,10 @@ export default function Home() {
     <div className="input-group">
       <label htmlFor="model">Veículo/Modelo</label>
       <input id="model" name="model" type="text" required placeholder="Ford Cargo"/>
+    </div>
+    <div className="input-group">
+       <label htmlFor="obra">Obra</label>
+       <input id="obra" name="obra" type="text" required placeholder="Ex: Elkem, Guarapuava, etc" />
     </div>
     <div className="input-group">
       <label htmlFor="responsible">Responsável</label>
@@ -178,6 +189,16 @@ export default function Home() {
     <span role="img" aria-label="car">🚗</span> Enviar KPI
   </button>
 </form>
+{loading && (
+  <div className="status-box loading">
+    Enviando, aguarde...
+  </div>
+)}
+{statusMsg && (
+  <div className={`status-box ${statusMsg.type}`}>
+    {statusMsg.text}
+  </div>
+)}
         </div>
         <iframe name="hiddenFrame" style={{ display: 'none' }} />
       </div>
@@ -344,6 +365,21 @@ export default function Home() {
           background: #bb0000;
           box-shadow: 0 6px 18px #e6000040;
           transform: scale(1.03) translateY(-2px);
+          .status-box {
+  margin: 1.2rem auto 0 auto;
+  max-width: 380px;
+  background: #fff;
+  border-radius: 12px;
+  padding: 1.3rem 1.2rem;
+  box-shadow: 0 4px 18px #16447522;
+  font-size: 1.08rem;
+  font-weight: 600;
+  color: #194579;
+  text-align: center;
+}
+.status-box.success { border: 2.2px solid #3bb233; color: #217a26; }
+.status-box.error { border: 2.2px solid #e60000; color: #e60000; }
+.status-box.loading { border: 2.2px dashed #194579; color: #194579; }
         }
       `}</style>
     </>
