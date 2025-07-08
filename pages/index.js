@@ -205,21 +205,18 @@ export default function Home() {
         </div>
       )}
       <style jsx>{`
-        .app, html, body { margin: 0; padding: 0; box-sizing: border-box; height: 100vh; }
-        .app {
-          position: relative;
-          width: 100vw;
-          height: 100vh;
-          overflow-y: auto;  /* permite rolar vertical no mobile */
-          overflow-x: hidden;
-          font-family: 'Inter', Arial, sans-serif;
+        html, body, #__next, .app {
+          margin: 0; padding: 0; box-sizing: border-box;
+          width: 100vw; height: 100vh;
+          min-height: 100vh; min-width: 100vw;
+          overflow: hidden !important; /* só o form rola! */
         }
+        .app { position: relative; width: 100vw; height: 100vh; overflow: hidden; font-family: 'Inter', Arial, sans-serif;}
         .pixel-art { image-rendering: pixelated; }
         .sky { position: absolute; inset: 0;
           background: linear-gradient(180deg, #2e7dd8 0%, #72c3fc 55%, #ffffff 100%);
           z-index: 0;
         }
-        /* ANIMAÇÃO DEGRADÊ DA NUVEM */
         .cloud {
           position: absolute;
           width: 180px; height: 100px;
@@ -254,14 +251,17 @@ export default function Home() {
         .car { bottom: 69px; }
         @keyframes carBounce { to { transform: translate(-50%, -7px);} }
 
+        /* FORMULÁRIO CENTRAL FIXO, APENAS ELE ROLA */
         .form-wrapper {
           position: absolute; inset: 0;
           display: flex; align-items: center; justify-content: center;
           z-index: 10;
         }
         .kpi-form {
-          min-width: 355px;
+          min-width: 340px;
           max-width: 370px;
+          max-height: 94vh; /* Limita altura do card */
+          overflow-y: auto;  /* Só o formulário rola! */
           background: #fff;
           border-radius: 12px;
           padding: 2.2rem 2.1rem 2rem 2.1rem;
@@ -426,6 +426,15 @@ export default function Home() {
         @keyframes spin {
           0%   { transform: rotate(0deg);}
           100% { transform: rotate(360deg);}
+        }
+
+        @media (max-width: 600px) {
+          .kpi-form {
+            min-width: 96vw;
+            max-width: 99vw;
+            max-height: 97vh;
+            padding: 1.2rem 2vw 1.5rem 2vw;
+          }
         }
       `}
       </style>
