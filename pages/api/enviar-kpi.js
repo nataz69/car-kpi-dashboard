@@ -1,5 +1,13 @@
 // pages/api/enviar-kpi.js
 
+export const config = {
+  api: {
+    bodyParser: {
+      sizeLimit: '20mb', // ou '20mb' se precisar
+    },
+  },
+};
+
 export default async function handler(req, res) {
   if (req.method === "POST") {
     try {
