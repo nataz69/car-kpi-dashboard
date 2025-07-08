@@ -4,14 +4,14 @@ import { useState, useEffect } from 'react'
 export default function Home() {
   const [previewSrc, setPreviewSrc] = useState(null)
   const [boxVisible, setBoxVisible] = useState(false)
-  const [loading, setLoading] = useState(false);
-  const [statusMsg, setStatusMsg] = useState(null); // { type: "success" | "error", text: "..." }
-  
+  const [loading, setLoading] = useState(false)
+  const [statusMsg, setStatusMsg] = useState(null)
+
   useEffect(() => {
     setTimeout(() => setBoxVisible(true), 400)
   }, [])
 
-  // Array com várias nuvens, cada uma com duração e posição inicial diferentes
+  // nuvens
   const clouds = [
     { top: '12%', left: '-150px', dur: '37s', z: 1 },
     { top: '26%', left: '-600px', dur: '48s', z: 1 },
@@ -35,7 +35,7 @@ export default function Home() {
       </Head>
       <div className="app">
         <div className="sky" />
-        {/* Nuvens com efeito fade out ao final */}
+        {/* Nuvens */}
         {clouds.map((c, i) => (
           <div
             key={i}
@@ -51,9 +51,8 @@ export default function Home() {
           />
         ))}
         <img src="/logo-mse.png" alt="Logo MSE" className="logo-cloud" />
-
         <div className="ground" />
-        {/* Trabalhadores mais pra cima */}
+        {/* Trabalhadores e máquina */}
         <div className="workers" style={{ bottom: 70 }}>
           {[1,2,3,4,5].map(i => (
             <img
@@ -63,7 +62,6 @@ export default function Home() {
               className="worker pixel-art"
             />
           ))}
-          {/* Máquina maior */}
           <img
             src="/trator-pixel.png"
             alt="Máquina"
@@ -78,133 +76,144 @@ export default function Home() {
           style={{ bottom: 69 }}
         />
 
-        {/* FORMULÁRIO MAIS CLEAN E PROFISSIONAL */}
+        {/* FORMULÁRIO */}
         <div className="form-wrapper">
           <form
-  className={`kpi-form ${boxVisible ? 'kpi-in' : ''}`}
-  autoComplete="off"
-  onSubmit={async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setStatusMsg(null);
-    const formData = new FormData(e.target);
-    const file = formData.get('photo');
-    if (!file) {
-      alert("Por favor, selecione uma foto.");
-      return;
-    }
+            className={`kpi-form ${boxVisible ? 'kpi-in' : ''}`}
+            autoComplete="off"
+            onSubmit={async (e) => {
+              e.preventDefault();
+              setLoading(true);
+              setStatusMsg(null);
 
-    // Converte imagem para base64
-    const toBase64 = file => new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => resolve(reader.result);
-      reader.onerror = reject;
-    });
+              const formData = new FormData(e.target);
+              const file = formData.get('photo');
+              if (!file) {
+                setLoading(false);
+                setStatusMsg({ type: "error", text: "Por favor, selecione uma foto." });
+                return;
+              }
 
-    const base64 = await toBase64(file);
-    const base64Data = base64.split(',')[1];
-    const photoType = file.type;
-    const photoName = file.name || "painel.jpg";
+              // Converte imagem para base64
+              const toBase64 = file => new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = reject;
+              });
 
-    // ENVIA para API intermediária Next.js (sem CORS)
-    const res = await fetch("/api/enviar-kpi", {
-      method: "POST",
-      body: JSON.stringify({
-        plate: formData.get('plate'),
-        model: formData.get('model'),
-        responsible: formData.get('responsible'),
-        km: formData.get('km'),
-        obra: formData.get('obra'),
-        photoBase64: base64Data,
-        photoType,
-        photoName
-      }),
-      headers: {
-        "Content-Type": "application/json"
-      }
-    });
+              const base64 = await toBase64(file);
+              const base64Data = base64.split(',')[1];
+              const photoType = file.type;
+              const photoName = file.name || "painel.jpg";
 
-    const result = await res.json();
-    if (result.success) {
-      setLoading(false);
-      setStatusMsg({ type: "success", text: "Enviado com sucesso! Foto salva no Drive." });
-      e.target.reset();
-      setPreviewSrc(null);
-    } else {
-      setLoading(false);
-      setStatusMsg({ type: "error", text: "Erro ao enviar: " + result.error });
-    }
-  }}
->
-  <h1 className="form-title">
-    Envio de <span className="red-detail">KPI de KM</span>
-  </h1>
-  <div className="fields">
-    <div className="input-group">
-      <label htmlFor="plate">Placa</label>
-      <input id="plate" name="plate" type="text" required placeholder="ABC-1234"/>
-    </div>
-    <div className="input-group">
-      <label htmlFor="model">Veículo/Modelo</label>
-      <input id="model" name="model" type="text" required placeholder="Ford Cargo"/>
-    </div>
-    <div className="input-group">
-       <label htmlFor="obra">Obra</label>
-       <input id="obra" name="obra" type="text" required placeholder="Ex: Elkem, Guarapuava, etc" />
-    </div>
-    <div className="input-group">
-      <label htmlFor="responsible">Responsável</label>
-      <input id="responsible" name="responsible" type="text" required placeholder="Nome"/>
-    </div>
-    <div className="input-group">
-      <label htmlFor="km">Quilometragem (km)</label>
-      <input id="km" name="km" type="number" min="0" required placeholder="0"/>
-    </div>
-    <div className="input-group">
-      <label htmlFor="photo">Foto do Painel</label>
-      <input
-        id="photo"
-        name="photo"
-        type="file"
-        required
-        accept="image/*"
-        onChange={e => {
-          const f = e.target.files[0]
-          setPreviewSrc(f ? URL.createObjectURL(f) : null)
-        }}
-      />
-    </div>
-    {previewSrc && (
-      <div className="preview-wrap">
-        <img
-          src={previewSrc}
-          alt="Pré-visualização"
-          className="preview"
-        />
-      </div>
-    )}
-  </div>
-  <button type="submit">
-    <span role="img" aria-label="car">🚗</span> Enviar KPI
-  </button>
-</form>
-{loading && (
-  <div className="status-box loading">
-    Enviando, aguarde...
-  </div>
-)}
-{statusMsg && (
-  <div className={`status-box ${statusMsg.type}`}>
-    {statusMsg.text}
-  </div>
-)}
+              // ENVIA para API intermediária Next.js (sem CORS)
+              const res = await fetch("/api/enviar-kpi", {
+                method: "POST",
+                body: JSON.stringify({
+                  obra: formData.get('obra'),
+                  plate: formData.get('plate'),
+                  model: formData.get('model'),
+                  responsible: formData.get('responsible'),
+                  km: formData.get('km'),
+                  photoBase64: base64Data,
+                  photoType,
+                  photoName
+                }),
+                headers: {
+                  "Content-Type": "application/json"
+                }
+              });
+
+              const result = await res.json();
+              if (result.success) {
+                setLoading(false);
+                setStatusMsg({ type: "success", text: "Enviado com sucesso! Foto salva no Drive." });
+                e.target.reset();
+                setPreviewSrc(null);
+                setTimeout(() => setStatusMsg(null), 2000); // some a mensagem de sucesso
+              } else {
+                setLoading(false);
+                setStatusMsg({ type: "error", text: "Erro ao enviar: " + result.error });
+              }
+            }}
+          >
+            <h1 className="form-title">
+              Envio de <span className="red-detail">KPI de KM</span>
+            </h1>
+            <div className="fields">
+              <div className="input-group">
+                <label htmlFor="obra">Obra</label>
+                <input id="obra" name="obra" type="text" required placeholder="Ex: Elkem, Guarapuava, etc" />
+              </div>
+              <div className="input-group">
+                <label htmlFor="plate">Placa</label>
+                <input id="plate" name="plate" type="text" required placeholder="ABC-1234"/>
+              </div>
+              <div className="input-group">
+                <label htmlFor="model">Veículo/Modelo</label>
+                <input id="model" name="model" type="text" required placeholder="Ford Cargo"/>
+              </div>
+              <div className="input-group">
+                <label htmlFor="responsible">Responsável</label>
+                <input id="responsible" name="responsible" type="text" required placeholder="Nome"/>
+              </div>
+              <div className="input-group">
+                <label htmlFor="km">Quilometragem (km)</label>
+                <input id="km" name="km" type="number" min="0" required placeholder="0"/>
+              </div>
+              <div className="input-group">
+                <label htmlFor="photo">Foto do Painel</label>
+                <input
+                  id="photo"
+                  name="photo"
+                  type="file"
+                  required
+                  accept="image/*"
+                  onChange={e => {
+                    const f = e.target.files[0]
+                    setPreviewSrc(f ? URL.createObjectURL(f) : null)
+                  }}
+                />
+              </div>
+              {previewSrc && (
+                <div className="preview-wrap">
+                  <img
+                    src={previewSrc}
+                    alt="Pré-visualização"
+                    className="preview"
+                  />
+                </div>
+              )}
+            </div>
+            <button type="submit">
+              <span role="img" aria-label="car">🚗</span> Enviar KPI
+            </button>
+          </form>
         </div>
         <iframe name="hiddenFrame" style={{ display: 'none' }} />
       </div>
+      {/* OVERLAY para carregando/sucesso/erro */}
+      {(loading || statusMsg) && (
+        <div className="overlay">
+          <div className={`status-modal ${loading ? "loading" : statusMsg?.type}`}>
+            {loading
+              ? <><div className="loader" /> Enviando, aguarde...</>
+              : statusMsg?.text
+            }
+          </div>
+        </div>
+      )}
       <style jsx>{`
-        .app, html, body { margin: 0; padding: 0; box-sizing: border-box; }
-        .app { position: relative; width: 100vw; height: 100vh; overflow: hidden; font-family: 'Inter', Arial, sans-serif; }
+        .app, html, body { margin: 0; padding: 0; box-sizing: border-box; height: 100vh; }
+        .app {
+          position: relative;
+          width: 100vw;
+          height: 100vh;
+          overflow-y: auto;  /* permite rolar vertical no mobile */
+          overflow-x: hidden;
+          font-family: 'Inter', Arial, sans-serif;
+        }
         .pixel-art { image-rendering: pixelated; }
         .sky { position: absolute; inset: 0;
           background: linear-gradient(180deg, #2e7dd8 0%, #72c3fc 55%, #ffffff 100%);
@@ -234,7 +243,7 @@ export default function Home() {
           80%  { left: 90vw;  top:10%;}
           100% { left: 115vw; top:11%; opacity:0.1;}
         }
-        .ground { position: absolute; bottom: 0; left: 0; width: 200%; height: 88px; background: url('/chão-pixel.png') repeat-x bottom; background-size: auto 88px; animation: groundScroll 13s linear infinite; z-index: 2;}
+        .ground { position: absolute; bottom: 0; left: 0; width: 200%; height: 88px; background: url('/chao-pixel.png') repeat-x bottom; background-size: auto 88px; animation: groundScroll 13s linear infinite; z-index: 2;}
         @keyframes groundScroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
         .workers { position: absolute; right:7vw; left: auto; display: flex; align-items: flex-end; gap: 54px; width: 790px; animation: workersScroll 13s linear infinite; z-index: 3;}
         .workers { bottom: 70px; }
@@ -245,7 +254,6 @@ export default function Home() {
         .car { bottom: 69px; }
         @keyframes carBounce { to { transform: translate(-50%, -7px);} }
 
-        /* ======== FORMULÁRIO CLEAN ======== */
         .form-wrapper {
           position: absolute; inset: 0;
           display: flex; align-items: center; justify-content: center;
@@ -344,8 +352,12 @@ export default function Home() {
         .preview {
           margin-top: 0.59rem;
           width: 92%;
+          max-width: 330px;
+          max-height: 190px;
+          object-fit: contain;
           border-radius: 11px;
           border: 2px solid #e60000;
+          background: #fafafa;
         }
         button[type="submit"] {
           margin-top: .65rem;
@@ -365,23 +377,58 @@ export default function Home() {
           background: #bb0000;
           box-shadow: 0 6px 18px #e6000040;
           transform: scale(1.03) translateY(-2px);
-          .status-box {
-  margin: 1.2rem auto 0 auto;
-  max-width: 380px;
-  background: #fff;
-  border-radius: 12px;
-  padding: 1.3rem 1.2rem;
-  box-shadow: 0 4px 18px #16447522;
-  font-size: 1.08rem;
-  font-weight: 600;
-  color: #194579;
-  text-align: center;
-}
-.status-box.success { border: 2.2px solid #3bb233; color: #217a26; }
-.status-box.error { border: 2.2px solid #e60000; color: #e60000; }
-.status-box.loading { border: 2.2px dashed #194579; color: #194579; }
         }
-      `}</style>
+
+        /* OVERLAY MODAL */
+        .overlay {
+          position: fixed;
+          inset: 0;
+          background: rgba(22, 33, 50, 0.23);
+          z-index: 9999;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: background 0.22s;
+        }
+        .status-modal {
+          background: #fff;
+          border-radius: 17px;
+          padding: 2.2rem 2.3rem;
+          box-shadow: 0 8px 42px #2226;
+          font-size: 1.14rem;
+          font-weight: 700;
+          color: #194579;
+          text-align: center;
+          min-width: 240px;
+          max-width: 96vw;
+          animation: pop .22s;
+        }
+        @keyframes pop {
+          from { transform: scale(.85); opacity: 0; }
+          to   { transform: scale(1); opacity: 1; }
+        }
+        .status-modal.success { border: 2.2px solid #3bb233; color: #217a26; }
+        .status-modal.error   { border: 2.2px solid #e60000; color: #e60000; }
+        .status-modal.loading { border: 2.2px dashed #194579; color: #194579; }
+
+        .loader {
+          border: 3.2px solid #e6e6e6;
+          border-top: 3.2px solid #e60000;
+          border-radius: 50%;
+          width: 28px;
+          height: 28px;
+          display: inline-block;
+          margin-bottom: 0.3rem;
+          margin-right: 0.6rem;
+          vertical-align: middle;
+          animation: spin 0.75s linear infinite;
+        }
+        @keyframes spin {
+          0%   { transform: rotate(0deg);}
+          100% { transform: rotate(360deg);}
+        }
+      `}
+      </style>
     </>
   )
 }
