@@ -79,105 +79,105 @@ export default function Home() {
         {/* FORMULÁRIO MAIS CLEAN E PROFISSIONAL */}
         <div className="form-wrapper">
           <form
-            className={`kpi-form ${boxVisible ? 'kpi-in' : ''}`}
-            autoComplete="off"
-            onSubmit={async (e) => {
-              e.preventDefault();
-              const formData = new FormData(e.target);
-              const file = formData.get('photo');
-              if (!file) {
-                alert("Por favor, selecione uma foto.");
-                return;
-              }
+  className={`kpi-form ${boxVisible ? 'kpi-in' : ''}`}
+  autoComplete="off"
+  onSubmit={async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const file = formData.get('photo');
+    if (!file) {
+      alert("Por favor, selecione uma foto.");
+      return;
+    }
 
-              // Converte imagem para base64
-              const toBase64 = file => new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.readAsDataURL(file);
-                reader.onload = () => resolve(reader.result);
-                reader.onerror = reject;
-              });
+    // Converte imagem para base64
+    const toBase64 = file => new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = reject;
+    });
 
-              const base64 = await toBase64(file);
-              const base64Data = base64.split(',')[1];
-              const photoType = file.type;
-              const photoName = file.name || "painel.jpg";
+    const base64 = await toBase64(file);
+    const base64Data = base64.split(',')[1];
+    const photoType = file.type;
+    const photoName = file.name || "painel.jpg";
 
-              // ENVIA para seu Apps Script WebApp
-              const res = await fetch("https://script.google.com/macros/s/AKfycbyEiNs6ttPbr6XPggLIHBqtNCHkgjjITw8-HOI6IpUck8359HWkq4AW8QZgA1sTbDZq/exec", {
-                method: "POST",
-                body: JSON.stringify({
-                  plate: formData.get('plate'),
-                  model: formData.get('model'),
-                  responsible: formData.get('responsible'),
-                  km: formData.get('km'),
-                  photoBase64: base64Data,
-                  photoType,
-                  photoName
-                }),
-                headers: {
-                  "Content-Type": "application/json"
-                }
-              });
+    // ENVIA para API intermediária Next.js (sem CORS)
+    const res = await fetch("/api/enviar-kpi", {
+      method: "POST",
+      body: JSON.stringify({
+        plate: formData.get('plate'),
+        model: formData.get('model'),
+        responsible: formData.get('responsible'),
+        km: formData.get('km'),
+        photoBase64: base64Data,
+        photoType,
+        photoName
+      }),
+      headers: {
+        "Content-Type": "application/json"
+      }
+    });
 
-              const result = await res.json();
-              if (result.success) {
-                alert("Enviado com sucesso! Foto salva no Drive.");
-                e.target.reset();
-                setPreviewSrc(null);
-              } else {
-                alert("Erro ao enviar: " + result.error);
-              }
-            }}
-          >
-            <h1 className="form-title">
-              Envio de <span className="red-detail">KPI de KM</span>
-            </h1>
-            <div className="fields">
-              <div className="input-group">
-                <label htmlFor="plate">Placa</label>
-                <input id="plate" name="plate" type="text" required placeholder="ABC-1234"/>
-              </div>
-              <div className="input-group">
-                <label htmlFor="model">Veículo/Modelo</label>
-                <input id="model" name="model" type="text" required placeholder="Ford Cargo"/>
-              </div>
-              <div className="input-group">
-                <label htmlFor="responsible">Responsável</label>
-                <input id="responsible" name="responsible" type="text" required placeholder="Nome"/>
-              </div>
-              <div className="input-group">
-                <label htmlFor="km">Quilometragem (km)</label>
-                <input id="km" name="km" type="number" min="0" required placeholder="0"/>
-              </div>
-              <div className="input-group">
-                <label htmlFor="photo">Foto do Painel</label>
-                <input
-                  id="photo"
-                  name="photo"
-                  type="file"
-                  required
-                  accept="image/*"
-                  onChange={e => {
-                    const f = e.target.files[0]
-                    setPreviewSrc(f ? URL.createObjectURL(f) : null)
-                  }}
-                />
-              </div>
-              {previewSrc && (
-                <div className="preview-wrap">
-                  <img
-                    src={previewSrc}
-                    alt="Pré-visualização"
-                    className="preview"
-                  />
-                </div>
-              )}
-            </div>
-            <button type="submit">
-              <span role="img" aria-label="car">🚗</span> Enviar KPI
-            </button>
-          </form>
+    const result = await res.json();
+    if (result.success) {
+      alert("Enviado com sucesso! Foto salva no Drive.");
+      e.target.reset();
+      setPreviewSrc(null);
+    } else {
+      alert("Erro ao enviar: " + result.error);
+    }
+  }}
+>
+  <h1 className="form-title">
+    Envio de <span className="red-detail">KPI de KM</span>
+  </h1>
+  <div className="fields">
+    <div className="input-group">
+      <label htmlFor="plate">Placa</label>
+      <input id="plate" name="plate" type="text" required placeholder="ABC-1234"/>
+    </div>
+    <div className="input-group">
+      <label htmlFor="model">Veículo/Modelo</label>
+      <input id="model" name="model" type="text" required placeholder="Ford Cargo"/>
+    </div>
+    <div className="input-group">
+      <label htmlFor="responsible">Responsável</label>
+      <input id="responsible" name="responsible" type="text" required placeholder="Nome"/>
+    </div>
+    <div className="input-group">
+      <label htmlFor="km">Quilometragem (km)</label>
+      <input id="km" name="km" type="number" min="0" required placeholder="0"/>
+    </div>
+    <div className="input-group">
+      <label htmlFor="photo">Foto do Painel</label>
+      <input
+        id="photo"
+        name="photo"
+        type="file"
+        required
+        accept="image/*"
+        onChange={e => {
+          const f = e.target.files[0]
+          setPreviewSrc(f ? URL.createObjectURL(f) : null)
+        }}
+      />
+    </div>
+    {previewSrc && (
+      <div className="preview-wrap">
+        <img
+          src={previewSrc}
+          alt="Pré-visualização"
+          className="preview"
+        />
+      </div>
+    )}
+  </div>
+  <button type="submit">
+    <span role="img" aria-label="car">🚗</span> Enviar KPI
+  </button>
+</form>
         </div>
         <iframe name="hiddenFrame" style={{ display: 'none' }} />
       </div>
