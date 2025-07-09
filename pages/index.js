@@ -419,6 +419,31 @@ export default function Home() {
           background: #f7f7f7;
           border-radius: 7px;
         }
+        .modal-overlay {
+  position: fixed; z-index: 9999; top: 0; left: 0; right: 0; bottom: 0;
+  width: 100vw; height: 100vh;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(30,30,30,0.18); transition: background 0.22s; pointer-events: all;
+}
+.status-modal {
+  background: #fff; border-radius: 14px; padding: 2.2rem 2.3rem;
+  box-shadow: 0 8px 24px #0002; font-size: 1.13rem; font-weight: 700; min-width: 230px; max-width: 96vw; text-align: center; border: 2.2px solid #e60000; color: #194579; animation: pop .22s;
+}
+.status-modal.success { border: 2.2px solid #3bb233; color: #217a26; }
+.status-modal.error   { border: 2.2px solid #e60000; color: #e60000; }
+.status-modal.loading { border: 2.2px dashed #194579; }
+.loader {
+  display: inline-block;
+  width: 22px;
+  height: 22px;
+  border: 4px solid #e60000;
+  border-top: 4px solid #fff;
+  border-radius: 50%;
+  animation: spin 0.85s linear infinite;
+  margin-right: 13px;
+  vertical-align: -6px;
+}
+@keyframes spin { 100% { transform: rotate(360deg); } }
       `}</style>
     </>
   )
