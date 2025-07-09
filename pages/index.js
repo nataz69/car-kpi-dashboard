@@ -1,4 +1,3 @@
-// pages/index.js
 import Head from 'next/head'
 import { useState, useEffect, useRef } from 'react'
 
@@ -14,12 +13,13 @@ export default function Home() {
     setTimeout(() => setBoxVisible(true), 200)
   }, [])
 
-  // Gera entre 16 e 32 nuvens
-  const clouds = Array.from({ length: 22 }).map((_, i) => ({
-    top: `${8 + (i % 9) * 7}%`,
-    left: `${-240 + (i * 110)}px`,
-    dur: `${35 + (i % 6) * 7 + Math.random() * 8}s`,
-    z: (i % 5 === 0 ? 2 : 1)
+  // Gera várias nuvens para preencher o céu
+  const clouds = Array.from({ length: 18 }).map((_, i) => ({
+    top: `${7 + ((i * 19) % 29)}%`,
+    left: `${-220 + (i * 150)}px`,
+    dur: `${33 + (i % 5) * 6 + Math.random() * 5}s`,
+    z: (i % 4 === 0 ? 2 : 1),
+    opacity: 0.65 + 0.17 * (i % 3)
   }))
 
   return (
@@ -39,27 +39,30 @@ export default function Home() {
               left: c.left,
               animationDuration: c.dur,
               zIndex: c.z,
-              opacity: c.z === 2 ? 0.75 : 0.92,
-              filter: c.z === 2 ? 'blur(0.8px)' : undefined,
-              animationDelay: `${i * 2.7}s`,
+              opacity: c.opacity,
+              animationDelay: `${i * 2.2}s`,
             }}
           />
         ))}
         <img src="/logo-mse.png" alt="Logo MSE" className="logo-cloud" />
-        <div className="ground" />
-        <div className="workers">
-          {[1,2,3,4,5].map(i => (
-            <img
-              key={i}
-              src={`/trabalhador_${i}-removebg-preview.png`}
-              alt={`Trabalhador ${i}`}
-              className="worker pixel-art"
-              style={{ height: '62px', marginBottom: '-2px' }}
-            />
-          ))}
-          <img src="/trator-pixel.png" alt="Máquina" className="machine pixel-art" style={{ height: '104px' }} />
+        
+        {/* CHÃO-PÍXEL */}
+        <div className="ground-area">
+          <div className="ground" />
+          <div className="workers">
+            {[1,2,3,4,5].map(i => (
+              <img
+                key={i}
+                src={`/trabalhador_${i}-removebg-preview.png`}
+                alt={`Trabalhador ${i}`}
+                className="worker pixel-art"
+                style={{ height: '62px' }}
+              />
+            ))}
+            <img src="/car-pixel.png" alt="Carro Pixel" className="car pixel-art" style={{ height: '70px', margin: '0 12px' }} />
+            <img src="/trator-pixel.png" alt="Máquina" className="machine pixel-art" style={{ height: '98px', marginLeft: '16px' }} />
+          </div>
         </div>
-        <img src="/car-pixel.png" alt="Carro Pixel" className="car pixel-art" style={{ height: '72px' }} />
 
         {/* FORMULÁRIO MAIS COMPACTO, UPLOAD BONITO */}
         <div className="form-wrapper">
@@ -90,7 +93,6 @@ export default function Home() {
                 photoName = file.name || "painel.jpg";
               }
 
-              // Use o endpoint que você passou!
               const res = await fetch("https://script.google.com/macros/s/AKfycbyEiNs6ttPbr6XPggLIHBqtNCHkgjjITw8-HOI6IpUck8359HWkq4AW8QZgA1sTbDZq/exec", {
                 method: "POST",
                 body: JSON.stringify({
@@ -207,42 +209,74 @@ export default function Home() {
         }
         .cloud {
           position: absolute; width: 180px; height: 100px; background: url('/cloud-pixel.png') no-repeat center; background-size: contain;
-          animation: cloudsMove linear infinite, cloudFadeOut 1s linear forwards;
+          animation: cloudsMove linear infinite;
           z-index: 1;
-          transition: opacity 0.7s linear;
+          transition: opacity 1.5s linear;
         }
-        @keyframes cloudsMove { from { transform: translateX(0); opacity: 1;} to { transform: translateX(120vw); opacity: 0; } }
-        @keyframes cloudFadeOut { from{ opacity: 1;} to { opacity: 0;}}
+        @keyframes cloudsMove {
+          0% { transform: translateX(0); opacity: 1;}
+          89% { opacity: 1; }
+          100% { transform: translateX(120vw); opacity: 0; }
+        }
         .logo-cloud { position: absolute; width: 108px; left: 8vw; top: 10%; z-index: 2;}
-        .ground { position: absolute; bottom: 0; left: 0; width: 200%; height: 88px; background: url('/chao-pixel.png') repeat-x bottom; background-size: auto 88px; animation: groundScroll 13s linear infinite; z-index: 2;}
+        
+        /* CHÃO COM PIXEL-ART */
+        .ground-area {
+          position: absolute;
+          bottom: 0; left: 0; right: 0;
+          height: 122px;
+          z-index: 30;
+          pointer-events: none;
+        }
+        .ground {
+          width: 100vw;
+          height: 88px;
+          background: url('/chao-pixel.png') repeat-x bottom;
+          background-size: auto 88px;
+          animation: groundScroll 13s linear infinite;
+          position: absolute;
+          left: 0; right: 0; bottom: 0;
+          z-index: 31;
+        }
         @keyframes groundScroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
-        .workers { position: absolute; bottom: 87px; left: 0; display: flex; align-items: flex-end; gap: 54px; width: 790px; animation: workersScroll 13s linear infinite; z-index: 3;}
-        .worker { width: 58px;}
-        .machine { width: 92px;}
-        @keyframes workersScroll { from { transform: translateX(100%); } to { transform: translateX(-100%); } }
-        .car { position: absolute; bottom: 86px; left: 53vw; transform: translateX(-50%); width: 170px; animation: carBounce 1.05s ease-in-out infinite alternate; z-index: 4;}
-        @keyframes carBounce { to { transform: translate(-50%, -7px);} }
+        .workers {
+          display: flex; align-items: flex-end; gap: 38px;
+          position: absolute;
+          left: 18vw;
+          bottom: 0px;
+          z-index: 34;
+          pointer-events: none;
+        }
+        .worker, .car, .machine {
+          display: inline-block;
+          vertical-align: bottom;
+          user-select: none;
+        }
+        .car { margin: 0 16px; }
+        .machine { margin-left: 18px;}
+        
+        /* FORMULÁRIO MAIS COMPACTO, SOFISTICADO, SCROLLBAR SÓ INTERNA */
         .form-wrapper {
           position: absolute;
           inset: 0;
           display: flex;
           align-items: center;
           justify-content: center;
-          z-index: 10;
+          z-index: 50;
           pointer-events: none;
         }
         .kpi-form {
-          min-width: 330px;
-          max-width: 375px;
-          max-height: 495px;
+          min-width: 320px;
+          max-width: 370px;
+          max-height: 500px;
           width: 94vw;
           background: #fff;
           border-radius: 19px;
           padding: 2.1rem 2.0rem 2.0rem 2.0rem;
-          box-shadow: 0 7px 36px #1d1a1a22, 0 1.5px 14px 0 #e6000022;
+          box-shadow: 0 8px 32px #0000002b, 0 2px 14px 0 #e6000022;
           display: flex; flex-direction: column; align-items: stretch;
           opacity: 0;
-          transform: scale(.97) translateY(20px);
+          transform: scale(.97) translateY(22px);
           transition: all .7s cubic-bezier(.77,0,.18,1);
           border: 1.5px solid #e2e6ef;
           position: relative;
@@ -387,6 +421,7 @@ export default function Home() {
         @media (max-width: 700px) {
           .form-wrapper { padding: 0; }
           .kpi-form { min-width: 0; width: 100vw; max-width: 99vw; max-height: 83vh; padding: 2.1rem 0.5rem; }
+          .ground-area .workers { left: 2vw; }
         }
       `}</style>
     </>
