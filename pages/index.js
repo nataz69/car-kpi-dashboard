@@ -458,6 +458,23 @@ export default function Home() {
 .kpi-form::-webkit-scrollbar-track {
   background: transparent;
 }
+:global(.kpi-form::-webkit-scrollbar) {
+  width: 11px;
+  background: transparent;
+}
+:global(.kpi-form::-webkit-scrollbar-thumb) {
+  background: rgba(230, 0, 0, 0.19);  /* Vermelho suave */
+  border-radius: 8px;
+  border: 2.5px solid #fff;           /* Borda branca do card */
+  min-height: 60px;
+  transition: background 0.2s;
+}
+:global(.kpi-form::-webkit-scrollbar-thumb:hover) {
+  background: rgba(230, 0, 0, 0.35);
+}
+:global(.kpi-form::-webkit-scrollbar-track) {
+  background: transparent;
+}
       `}
       </style>
     </>
