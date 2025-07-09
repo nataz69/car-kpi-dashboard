@@ -56,7 +56,7 @@ export default function Home() {
           <img src="/trator-pixel.png" alt="Máquina" className="machine pixel-art" />
         </div>
         <img src="/car-pixel.png" alt="Carro Pixel" className="car pixel-art" />
-        
+
         {/* FORMULÁRIO COM SCROLL INTERNO */}
         <div className="form-wrapper">
           <form
