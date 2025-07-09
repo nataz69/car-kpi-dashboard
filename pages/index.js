@@ -363,3 +363,29 @@ export default function Home() {
         .status-modal.success { border: 2.2px solid #3bb233; color: #217a26; }
         .status-modal.error   { border: 2.2px solid #e60000; color: #e60000; }
         .status-modal.loading { border:
+                .status-modal.loading { border: 2.2px dashed #194579; color: #194579; }
+        .loader {
+          border: 3.2px solid #e6e6e6;
+          border-top: 3.2px solid #e60000;
+          border-radius: 50%;
+          width: 28px; height: 28px;
+          display: inline-block;
+          margin-bottom: 0.3rem;
+          margin-right: 0.6rem;
+          vertical-align: middle;
+          animation: spin 0.75s linear infinite;
+        }
+        @keyframes spin {
+          0%   { transform: rotate(0deg);}
+          100% { transform: rotate(360deg);}
+        }
+        @media (max-width: 600px) {
+          .form-wrapper { align-items: flex-start; }
+          .kpi-form { min-width: 0; width: 97vw; padding: 1.5rem 0.2rem 1.3rem 0.2rem; }
+          .status-modal { padding: 1.1rem 0.8rem; font-size: 1.07rem; min-width: 0; width: 98vw;}
+        }
+      `}
+      </style>
+    </>
+  )
+}
