@@ -475,6 +475,26 @@ export default function Home() {
 :global(.kpi-form::-webkit-scrollbar-track) {
   background: transparent;
 }
+:global(.kpi-form::-webkit-scrollbar) {
+  width: 10px;
+  background: transparent;
+}
+
+:global(.kpi-form::-webkit-scrollbar-thumb) {
+  background: rgba(230,0,0,0.09);     /* Mais clara ainda */
+  border-radius: 8px;
+  border: 2.5px solid #fff;
+  min-height: 60px;
+  transition: background 0.2s;
+}
+
+:global(.kpi-form::-webkit-scrollbar-thumb:hover) {
+  background: rgba(230,0,0,0.21);
+}
+
+:global(.kpi-form::-webkit-scrollbar-track) {
+  background: transparent;
+}
       `}
       </style>
     </>
