@@ -185,16 +185,16 @@ export default function Home() {
               <span role="img" aria-label="car">🚗</span> Enviar KPI
             </button>
           </form>
-          {loading && (
-            <div className="status-box loading">
-              Enviando, aguarde...
-            </div>
-          )}
-          {statusMsg && (
-            <div className={`status-box ${statusMsg.type}`}>
-              {statusMsg.text}
-            </div>
-          )}
+          {(loading || statusMsg) && (
+  <div className="modal-overlay">
+    <div className={`status-modal${loading ? " loading" : ""}${statusMsg ? " " + statusMsg.type : ""}`}>
+      {loading
+        ? (<><span className="loader"></span> Enviando, aguarde...</>)
+        : statusMsg?.text
+      }
+    </div>
+  </div>
+)}
         </div>
         <iframe name="hiddenFrame" style={{ display: 'none' }} />
       </div>
