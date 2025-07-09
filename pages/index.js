@@ -8,7 +8,7 @@ export default function Home() {
   const [statusMsg, setStatusMsg] = useState(null)
 
   useEffect(() => {
-    setTimeout(() => setBoxVisible(true), 400)
+    setTimeout(() => setBoxVisible(true), 200)
   }, [])
 
   const clouds = [
@@ -56,7 +56,7 @@ export default function Home() {
           <img src="/trator-pixel.png" alt="Máquina" className="machine pixel-art" />
         </div>
         <img src="/car-pixel.png" alt="Carro Pixel" className="car pixel-art" />
-
+        
         {/* FORMULÁRIO COM SCROLL INTERNO */}
         <div className="form-wrapper">
           <form
@@ -151,6 +151,7 @@ export default function Home() {
                     const f = e.target.files[0]
                     setPreviewSrc(f ? URL.createObjectURL(f) : null)
                   }}
+                  style={{padding: '0.5rem 0'}}
                 />
               </div>
               {previewSrc && (
@@ -163,7 +164,7 @@ export default function Home() {
                 </div>
               )}
             </div>
-            <button type="submit">
+            <button type="submit" className="submit-btn">
               <span role="img" aria-label="car">🚗</span> Enviar KPI
             </button>
           </form>
@@ -224,19 +225,19 @@ export default function Home() {
           pointer-events: none;
         }
         .kpi-form {
-          min-width: 350px;
+          min-width: 340px;
           max-width: 370px;
-          max-height: 500px;
+          max-height: 530px;
           width: 94vw;
-          background: rgba(255,255,255,0.97);
-          border-radius: 19px;
-          padding: 2.6rem 2.2rem 2.2rem 2.2rem;
-          box-shadow: 0 7px 44px #16447540, 0 1.5px 14px 0 #e6000022;
+          background: #fff;
+          border-radius: 20px;
+          padding: 2.1rem 2.1rem 2.1rem 2.1rem;
+          box-shadow: 0 6px 30px #0000001a, 0 1.5px 14px 0 #e6000022;
           display: flex; flex-direction: column; align-items: stretch;
           opacity: 0;
           transform: scale(.96) translateY(30px);
           transition: all .6s cubic-bezier(.77,0,.18,1);
-          border: 1.5px solid #e7eaf0;
+          border: 1.5px solid #e2e6ef;
           position: relative;
           overflow-y: auto;
           pointer-events: auto;
@@ -252,69 +253,70 @@ export default function Home() {
           100% { opacity:1; transform: scale(1) translateY(0);}
         }
         .kpi-form h1 {
-          margin: 0 0 2.1rem 0;
-          font-size: 1.35rem;
+          margin: 0 0 1.5rem 0;
+          font-size: 1.25rem;
           font-weight: 800;
-          letter-spacing: .1rem;
+          letter-spacing: .07rem;
           text-align: center;
         }
-        .fields { display: flex; flex-direction: column; gap: 1.15rem; margin-bottom: 1.3rem; }
-        .input-group { display: flex; flex-direction: column; gap: 0.33rem; }
-        .input-group label { color: #e60000; font-weight: 700; font-size: 1.05rem; margin-bottom: 1px; }
+        .red-detail { color: #e60000; }
+        .fields { display: flex; flex-direction: column; gap: 1.10rem; margin-bottom: 1.1rem; }
+        .input-group { display: flex; flex-direction: column; gap: 0.25rem; }
+        .input-group label { color: #161a23; font-weight: 700; font-size: 1rem; margin-bottom: 1px; }
         .input-group input[type="text"], .input-group input[type="number"], .input-group textarea {
-          padding: 0.9rem 1rem;
-          border-radius: 8px;
-          border: 1.7px solid #c5cbe0;
+          padding: 0.85rem 1rem;
+          border-radius: 9px;
+          border: 2px solid #e60000;
           font-size: 1.04rem;
-          color: #233;
+          color: #222;
           font-family: inherit;
           font-weight: 700;
-          letter-spacing: .4px;
-          background: #f8fafc;
-          transition: border 0.17s, box-shadow 0.18s;
-          outline: none;
-          box-shadow: 0 1.5px 7px #e6000025;
-        }
-        .input-group input[type="text"]:focus, .input-group input[type="number"]:focus, .input-group textarea:focus {
-          border-color: #e60000;
           background: #fff;
-          box-shadow: 0 3px 14px #e6000033, 0 2px 4px #e6000015;
+          transition: border 0.18s, box-shadow 0.18s;
+          outline: none;
+        }
+        .input-group input[type="text"]:focus,
+        .input-group input[type="number"]:focus,
+        .input-group textarea:focus {
+          border-color: #b00000;
+          background: #f9f9fa;
         }
         .input-group input[type="file"] { margin-top: 2px; color: #e60000; font-weight: 700;}
         .preview-wrap { text-align: center; }
         .preview {
-          margin-top: 0.59rem;
+          margin-top: 0.52rem;
           width: 92%;
           border-radius: 11px;
           border: 2px solid #e60000;
         }
-        .kpi-form button[type="submit"] {
-          margin-top: 2rem;
-          padding: 1.14rem 0;
+        .submit-btn {
+          margin-top: 1.7rem;
+          padding: 1.12rem 0;
           background: #e60000;
           border: none;
           color: #fff;
-          font-size: 1.17rem;
+          font-size: 1.13rem;
           font-weight: 800;
-          border-radius: 11px;
-          box-shadow: 0 3.5px 18px #e6000034, 0 1px 4px #e6000020;
+          border-radius: 13px;
+          box-shadow: 0 3.5px 18px #e6000026, 0 1px 4px #e6000016;
           cursor: pointer;
-          position: relative;
-          overflow: hidden;
-          letter-spacing: .09rem;
+          width: 100%;
+          letter-spacing: .07rem;
           transition: background .16s;
+          outline: none;
+          border-bottom: 4px solid #b00000;
         }
-        .kpi-form button[type="submit"]:hover,
-        .kpi-form button[type="submit"]:focus { background: #b00000; }
+        .submit-btn:active,
+        .submit-btn:focus { background: #b00000; }
         .modal-overlay {
           position: fixed; z-index: 9999; top: 0; left: 0; right: 0; bottom: 0;
           width: 100vw; height: 100vh;
           display: flex; align-items: center; justify-content: center;
-          background: rgba(30,30,30,0.18); transition: background 0.22s; pointer-events: all;
+          background: rgba(30,30,30,0.13); transition: background 0.18s; pointer-events: all;
         }
         .status-modal {
           background: #fff; border-radius: 14px; padding: 2.2rem 2.3rem;
-          box-shadow: 0 8px 24px #0002; font-size: 1.13rem; font-weight: 700; min-width: 230px; max-width: 96vw; text-align: center; border: 2.2px solid #e60000; color: #194579; animation: pop .22s;
+          box-shadow: 0 8px 24px #0002; font-size: 1.11rem; font-weight: 700; min-width: 230px; max-width: 96vw; text-align: center; border: 2.2px solid #e60000; color: #194579; animation: pop .22s;
         }
         .status-modal.success { border: 2.2px solid #3bb233; color: #217a26; }
         .status-modal.error   { border: 2.2px solid #e60000; color: #e60000; }
@@ -331,11 +333,27 @@ export default function Home() {
           vertical-align: -6px;
         }
         @keyframes spin { 100% { transform: rotate(360deg); } }
-
-        /* MOBILE AJUSTES */
+        /* === SCROLLBAR BONITA NO FORMULÁRIO === */
+        .kpi-form::-webkit-scrollbar {
+          width: 13px;
+          background: transparent;
+        }
+        .kpi-form::-webkit-scrollbar-thumb {
+          background: #e60000;
+          border-radius: 12px;
+          border: 3px solid #fff;
+        }
+        .kpi-form::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        /* Para Firefox */
+        .kpi-form {
+          scrollbar-color: #e60000 #fff;
+          scrollbar-width: thin;
+        }
         @media (max-width: 700px) {
           .form-wrapper { padding: 0; }
-          .kpi-form { min-width: 0; width: 100vw; max-width: 98vw; max-height: 85vh; padding: 2.1rem 0.8rem; }
+          .kpi-form { min-width: 0; width: 100vw; max-width: 99vw; max-height: 85vh; padding: 2.1rem 0.7rem; }
         }
       `}</style>
     </>
