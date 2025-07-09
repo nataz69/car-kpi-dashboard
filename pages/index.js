@@ -5,7 +5,7 @@ export default function Home() {
   const [previewSrc, setPreviewSrc] = useState(null)
   const [boxVisible, setBoxVisible] = useState(false)
   const [loading, setLoading] = useState(false);
-  const [statusMsg, setStatusMsg] = useState(null); // { type: "success" | "error", text: "..." }
+  const [statusMsg, setStatusMsg] = useState(null);
 
   useEffect(() => {
     setTimeout(() => setBoxVisible(true), 400)
@@ -106,7 +106,7 @@ export default function Home() {
                   responsible: formData.get('responsible'),
                   km: formData.get('km'),
                   obra: formData.get('obra'),
-                  observacao: formData.get('observacao'), // novo campo
+                  observacao: formData.get('observacao'), // <- CAMPO NOVO
                   photoBase64: base64Data,
                   photoType,
                   photoName
@@ -151,12 +151,12 @@ export default function Home() {
                 <label htmlFor="km">Quilometragem (km)</label>
                 <input id="km" name="km" type="number" min="0" required placeholder="0"/>
               </div>
-              {/* NOVO CAMPO DE OBSERVAÇÃO */}
+              {/* CAMPO DE OBSERVAÇÃO ADICIONADO */}
               <div className="input-group">
                 <label htmlFor="observacao">Observação</label>
                 <textarea id="observacao" name="observacao" rows={2} placeholder="Opcional"></textarea>
               </div>
-              {/* FIM DO NOVO CAMPO */}
+              {/* FIM DO CAMPO */}
               <div className="input-group">
                 <label htmlFor="photo">Foto do Painel</label>
                 <input
@@ -185,60 +185,220 @@ export default function Home() {
               <span role="img" aria-label="car">🚗</span> Enviar KPI
             </button>
           </form>
-
-          {/* MODAL CENTRALIZADA E FIXA */}
-          {(loading || statusMsg) && (
-            <div className={`modal-overlay`}>
-              <div className={`status-modal ${loading ? "loading" : ""} ${statusMsg ? statusMsg.type : ""}`}>
-                {loading
-                  ? "Enviando, aguarde..."
-                  : statusMsg?.text
-                }
-              </div>
+          {loading && (
+            <div className="status-box loading">
+              Enviando, aguarde...
+            </div>
+          )}
+          {statusMsg && (
+            <div className={`status-box ${statusMsg.type}`}>
+              {statusMsg.text}
             </div>
           )}
         </div>
         <iframe name="hiddenFrame" style={{ display: 'none' }} />
       </div>
       <style jsx>{`
-        .modal-overlay {
-          position: fixed;
-          z-index: 9999;
-          top: 0; left: 0; right: 0; bottom: 0;
-          width: 100vw; height: 100vh;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          background: rgba(20,20,20,0.10);
-          pointer-events: all;
+        .app, html, body { margin: 0; padding: 0; box-sizing: border-box; }
+        .app { position: relative; width: 100vw; height: 100vh; overflow: hidden; font-family: 'Inter', Arial, sans-serif; }
+        .pixel-art { image-rendering: pixelated; }
+        .sky { position: absolute; inset: 0;
+          background: linear-gradient(180deg, #2e7dd8 0%, #72c3fc 55%, #ffffff 100%);
+          z-index: 0;
         }
-        .status-modal {
+        .cloud {
+          position: absolute;
+          width: 180px; height: 100px;
+          background: url('/cloud-pixel.png') no-repeat center;
+          background-size: contain;
+          animation: cloudsMove linear infinite;
+          z-index: 1;
+          -webkit-mask-image: linear-gradient(90deg, #000 80%, transparent 99%);
+          mask-image: linear-gradient(90deg, #000 80%, transparent 99%);
+        }
+        @keyframes cloudsMove {
+          from { transform: translateX(0); opacity: 1; }
+          to   { transform: translateX(120vw); opacity: 0; }
+        }
+        .logo-cloud { position: absolute; width: 108px; left: 8vw; top: 10%; z-index: 2; animation: logoCloudFloat 39s linear infinite;}
+        @keyframes logoCloudFloat {
+          0%   { left: 8vw;   top:10%;  opacity:1;}
+          12%  { left: 18vw;  top:15%;}
+          41%  { left: 33vw;  top:13%;}
+          60%  { left: 65vw;  top:16%;}
+          80%  { left: 90vw;  top:10%;}
+          100% { left: 115vw; top:11%; opacity:0.1;}
+        }
+        .ground { position: absolute; bottom: 0; left: 0; width: 200%; height: 88px; background: url('/chao-pixel.png') repeat-x bottom; background-size: auto 88px; animation: groundScroll 13s linear infinite; z-index: 2;}
+        @keyframes groundScroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+        .workers { position: absolute; right:7vw; left: auto; display: flex; align-items: flex-end; gap: 54px; width: 790px; animation: workersScroll 13s linear infinite; z-index: 3;}
+        .workers { bottom: 70px; }
+        .worker { width: 58px;}
+        .machine { width: 125px; }
+        @keyframes workersScroll { from { transform: translateX(100%); } to { transform: translateX(-100%); } }
+        .car { position: absolute; left: 53vw; transform: translateX(-50%); width: 170px; animation: carBounce 1.05s ease-in-out infinite alternate; z-index: 4;}
+        .car { bottom: 69px; }
+        @keyframes carBounce { to { transform: translate(-50%, -7px);} }
+        .form-wrapper {
+          position: absolute; inset: 0;
+          display: flex; align-items: center; justify-content: center;
+          z-index: 10;
+        }
+        .kpi-form {
+          min-width: 355px;
+          max-width: 370px;
+          max-height: 94vh;
           background: #fff;
-          border-radius: 14px;
-          padding: 2.2rem 2.3rem;
-          box-shadow: 0 8px 24px #0002;
-          font-size: 1.13rem;
-          font-weight: 700;
-          min-width: 230px;
-          max-width: 96vw;
+          border-radius: 12px;
+          padding: 2.2rem 2.1rem 2rem 2.1rem;
+          box-shadow: 0 4px 18px #2222;
+          display: flex; flex-direction: column; align-items: stretch;
+          opacity: 0;
+          transform: scale(.96) translateY(30px);
+          transition: all .6s cubic-bezier(.77,0,.18,1);
+          border: 1.5px solid #e7eaf0;
+          position: relative;
+          overflow-y: auto;
+        }
+        .kpi-in {
+          opacity: 1;
+          transform: scale(1) translateY(0);
+          animation: formPop .58s cubic-bezier(.56,-0.37,.61,1.29);
+        }
+        @keyframes formPop {
+          0% { opacity:0; transform: scale(.94) translateY(38px);}
+          75% { opacity:1; transform: scale(1.03) translateY(-9px);}
+          100% { opacity:1; transform: scale(1) translateY(0);}
+        }
+        .form-title {
+          margin: 0 0 1.4rem 0;
+          font-size: 1.26rem;
+          font-weight: 800;
+          letter-spacing: .01rem;
+          color: #222;
           text-align: center;
-          border: 2.2px solid #e60000;
+        }
+        .red-detail { color: #e60000; font-weight: 800; }
+        .fields {
+          display: flex;
+          flex-direction: column;
+          gap: 1.1rem;
+          margin-bottom: 1.15rem;
+        }
+        .input-group {
+          display: flex;
+          flex-direction: column;
+          gap: 0.22rem;
+        }
+        .input-group label {
+          color: #222;
+          font-weight: 600;
+          font-size: 1.01rem;
+          margin-bottom: 2px;
+          transition: color .2s;
+        }
+        .input-group input[type="text"]:focus + label,
+        .input-group input[type="number"]:focus + label {
+          color: #e60000;
+        }
+        .input-group input[type="text"],
+        .input-group input[type="number"] {
+          padding: 0.82rem 0.9rem;
+          border-radius: 8px;
+          border: 1.5px solid #e60000;
+          font-size: 1.02rem;
+          color: #222;
+          background: #fafbfc;
+          font-family: inherit;
+          font-weight: 600;
+          letter-spacing: .3px;
+          transition: border 0.2s, box-shadow 0.22s;
+          outline: none;
+          box-shadow: 0 1.5px 7px #e6000020;
+        }
+        .input-group input[type="text"]:focus,
+        .input-group input[type="number"]:focus {
+          border-color: #111;
+          box-shadow: 0 3px 14px #e6000033, 0 2px 4px #e6000015;
+        }
+        .input-group input[type="file"] { margin-top: 2px; color: #e60000; font-weight: 600;}
+        .input-group input[type="file"]::-webkit-file-upload-button {
+          color: #fff;
+          background: #e60000;
+          border: none;
+          border-radius: 7px;
+          padding: 6px 14px;
+          cursor: pointer;
+          font-weight: 600;
+          transition: background 0.2s;
+        }
+        .input-group input[type="file"]:hover::-webkit-file-upload-button {
+          background: #bb0000;
+        }
+        .preview-wrap { text-align: center; }
+        .preview {
+          margin-top: 0.59rem;
+          width: 92%;
+          border-radius: 11px;
+          border: 2px solid #e60000;
+        }
+        button[type="submit"] {
+          margin-top: .65rem;
+          background: #e60000;
+          color: #fff;
+          font-size: 1.13rem;
+          font-weight: bold;
+          padding: .83rem 0;
+          border: none;
+          border-radius: 8px;
+          cursor: pointer;
+          box-shadow: 0 2px 12px #e6000035;
+          letter-spacing: 1px;
+          transition: background 0.18s, box-shadow 0.18s, transform 0.18s;
+        }
+        button[type="submit"]:hover, button[type="submit"]:focus {
+          background: #bb0000;
+          box-shadow: 0 6px 18px #e6000040;
+          transform: scale(1.03) translateY(-2px);
+        }
+        .status-box {
+          margin: 1.2rem auto 0 auto;
+          max-width: 380px;
+          background: #fff;
+          border-radius: 12px;
+          padding: 1.3rem 1.2rem;
+          box-shadow: 0 4px 18px #16447522;
+          font-size: 1.08rem;
+          font-weight: 600;
           color: #194579;
-          animation: pop .22s;
+          text-align: center;
         }
-        .status-modal.success { border: 2.2px solid #3bb233; color: #217a26; }
-        .status-modal.error   { border: 2.2px solid #e60000; color: #e60000; }
-        .status-modal.loading { border: 2.2px dashed #194579; }
-        @keyframes pop {
-          0% { transform: scale(0.92);}
-          100% { transform: scale(1);}
+        .status-box.success { border: 2.2px solid #3bb233; color: #217a26; }
+        .status-box.error { border: 2.2px solid #e60000; color: #e60000; }
+        .status-box.loading { border: 2.2px dashed #194579; color: #194579; }
+
+        /* ===== SCROLLBAR ESTILIZADA ===== */
+        :global(.kpi-form::-webkit-scrollbar) {
+          width: 13px;
+          background: transparent;
         }
-        @media (max-width: 700px) {
-          .modal-overlay { align-items: center; justify-content: center; }
-          .status-modal { min-width: 0; font-size: 1rem; }
+        :global(.kpi-form::-webkit-scrollbar-thumb) {
+          background: #e60000;                 /* Vermelho sólido */
+          border-radius: 8px;
+          border: 3px solid #f4f4f4;           /* Branco-fumaça */
+          min-height: 60px;
+          transition: background 0.2s, border 0.2s;
+          box-shadow: 0 0 6px #e6000022 inset;
+        }
+        :global(.kpi-form::-webkit-scrollbar-thumb:hover) {
+          background: #b80000;                 /* Vermelho escuro */
+          border: 3px solid #ececec;
+        }
+        :global(.kpi-form::-webkit-scrollbar-track) {
+          background: #f7f7f7;
+          border-radius: 7px;
         }
       `}</style>
-      {/* ...demais estilos seguem seus originais... */}
     </>
   )
 }
