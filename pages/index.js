@@ -4,13 +4,14 @@ import { useState, useEffect } from 'react'
 export default function Home() {
   const [previewSrc, setPreviewSrc] = useState(null)
   const [boxVisible, setBoxVisible] = useState(false)
-  const [loading, setLoading] = useState(false);
-  const [statusMsg, setStatusMsg] = useState(null); // { type: "success" | "error", text: "..." }
+  const [loading, setLoading] = useState(false)
+  const [statusMsg, setStatusMsg] = useState(null)
 
   useEffect(() => {
     setTimeout(() => setBoxVisible(true), 400)
   }, [])
 
+  // clouds (padrão)
   const clouds = [
     { top: '12%', left: '-150px', dur: '37s', z: 1 },
     { top: '26%', left: '-600px', dur: '48s', z: 1 },
@@ -185,20 +186,14 @@ export default function Home() {
               <span role="img" aria-label="car">🚗</span> Enviar KPI
             </button>
           </form>
-
-          {/* Modal de carregamento/status 100% centralizado */}
           {(loading || statusMsg) && (
             <div className="modal-overlay">
-              {loading && (
-                <div className="status-modal loading">
-                  <span className="loader"></span> Enviando, aguarde...
-                </div>
-              )}
-              {statusMsg && (
-                <div className={`status-modal ${statusMsg.type}`}>
-                  {statusMsg.text}
-                </div>
-              )}
+              <div className={`status-modal${loading ? " loading" : ""}${statusMsg ? " " + statusMsg.type : ""}`}>
+                {loading
+                  ? (<><span className="loader"></span> Enviando, aguarde...</>)
+                  : statusMsg?.text
+                }
+              </div>
             </div>
           )}
         </div>
@@ -257,7 +252,6 @@ export default function Home() {
             width: 98vw;
           }
         }
-        /* ...seus outros estilos seguem normalmente... */
       `}
       </style>
     </>
