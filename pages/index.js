@@ -384,6 +384,29 @@ export default function Home() {
           .kpi-form { min-width: 0; width: 97vw; padding: 1.5rem 0.2rem 1.3rem 0.2rem; }
           .status-modal { padding: 1.1rem 0.8rem; font-size: 1.07rem; min-width: 0; width: 98vw;}
         }
+        .form-wrapper {
+  overflow: hidden;
+}
+.kpi-form {
+  max-height: 80vh;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #e60000 #eee;
+}
+.kpi-form::-webkit-scrollbar {
+  width: 10px;
+  background: #eee;
+  border-radius: 8px;
+}
+.kpi-form::-webkit-scrollbar-thumb {
+  background: #e60000;
+  border-radius: 8px;
+  border: 2px solid #eee;
+}
+@media (max-width: 600px) {
+  .kpi-form { max-height: 94vh; }
+  .kpi-form::-webkit-scrollbar { display: none; }
+}
       `}
       </style>
     </>
