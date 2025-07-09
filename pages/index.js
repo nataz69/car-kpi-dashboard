@@ -4,14 +4,13 @@ import { useState, useEffect } from 'react'
 export default function Home() {
   const [previewSrc, setPreviewSrc] = useState(null)
   const [boxVisible, setBoxVisible] = useState(false)
-  const [loading, setLoading] = useState(false)
-  const [statusMsg, setStatusMsg] = useState(null)
-
+  const [loading, setLoading] = useState(false);
+  const [statusMsg, setStatusMsg] = useState(null); // { type: "success" | "error", text: "..." }
+  
   useEffect(() => {
     setTimeout(() => setBoxVisible(true), 400)
   }, [])
 
-  // nuvens
   const clouds = [
     { top: '12%', left: '-150px', dur: '37s', z: 1 },
     { top: '26%', left: '-600px', dur: '48s', z: 1 },
@@ -35,7 +34,6 @@ export default function Home() {
       </Head>
       <div className="app">
         <div className="sky" />
-        {/* Nuvens */}
         {clouds.map((c, i) => (
           <div
             key={i}
@@ -52,7 +50,6 @@ export default function Home() {
         ))}
         <img src="/logo-mse.png" alt="Logo MSE" className="logo-cloud" />
         <div className="ground" />
-        {/* Trabalhadores e máquina */}
         <div className="workers" style={{ bottom: 70 }}>
           {[1,2,3,4,5].map(i => (
             <img
@@ -76,7 +73,6 @@ export default function Home() {
           style={{ bottom: 69 }}
         />
 
-        {/* FORMULÁRIO */}
         <div className="form-wrapper">
           <form
             className={`kpi-form ${boxVisible ? 'kpi-in' : ''}`}
@@ -85,37 +81,31 @@ export default function Home() {
               e.preventDefault();
               setLoading(true);
               setStatusMsg(null);
-
               const formData = new FormData(e.target);
               const file = formData.get('photo');
               if (!file) {
+                alert("Por favor, selecione uma foto.");
                 setLoading(false);
-                setStatusMsg({ type: "error", text: "Por favor, selecione uma foto." });
                 return;
               }
-
-              // Converte imagem para base64
               const toBase64 = file => new Promise((resolve, reject) => {
                 const reader = new FileReader();
                 reader.readAsDataURL(file);
                 reader.onload = () => resolve(reader.result);
                 reader.onerror = reject;
               });
-
               const base64 = await toBase64(file);
               const base64Data = base64.split(',')[1];
               const photoType = file.type;
               const photoName = file.name || "painel.jpg";
-
-              // ENVIA para API intermediária Next.js (sem CORS)
               const res = await fetch("/api/enviar-kpi", {
                 method: "POST",
                 body: JSON.stringify({
-                  obra: formData.get('obra'),
                   plate: formData.get('plate'),
                   model: formData.get('model'),
                   responsible: formData.get('responsible'),
                   km: formData.get('km'),
+                  obra: formData.get('obra'),
                   photoBase64: base64Data,
                   photoType,
                   photoName
@@ -124,14 +114,12 @@ export default function Home() {
                   "Content-Type": "application/json"
                 }
               });
-
               const result = await res.json();
               if (result.success) {
                 setLoading(false);
                 setStatusMsg({ type: "success", text: "Enviado com sucesso! Foto salva no Drive." });
                 e.target.reset();
                 setPreviewSrc(null);
-                setTimeout(() => setStatusMsg(null), 2000); // some a mensagem de sucesso
               } else {
                 setLoading(false);
                 setStatusMsg({ type: "error", text: "Erro ao enviar: " + result.error });
@@ -143,16 +131,16 @@ export default function Home() {
             </h1>
             <div className="fields">
               <div className="input-group">
-                <label htmlFor="obra">Obra</label>
-                <input id="obra" name="obra" type="text" required placeholder="Ex: Elkem, Guarapuava, etc" />
-              </div>
-              <div className="input-group">
                 <label htmlFor="plate">Placa</label>
                 <input id="plate" name="plate" type="text" required placeholder="ABC-1234"/>
               </div>
               <div className="input-group">
                 <label htmlFor="model">Veículo/Modelo</label>
                 <input id="model" name="model" type="text" required placeholder="Ford Cargo"/>
+              </div>
+              <div className="input-group">
+                <label htmlFor="obra">Obra</label>
+                <input id="obra" name="obra" type="text" required placeholder="Ex: Elkem, Guarapuava, etc" />
               </div>
               <div className="input-group">
                 <label htmlFor="responsible">Responsável</label>
@@ -190,28 +178,22 @@ export default function Home() {
               <span role="img" aria-label="car">🚗</span> Enviar KPI
             </button>
           </form>
+          {loading && (
+            <div className="status-box loading">
+              Enviando, aguarde...
+            </div>
+          )}
+          {statusMsg && (
+            <div className={`status-box ${statusMsg.type}`}>
+              {statusMsg.text}
+            </div>
+          )}
         </div>
         <iframe name="hiddenFrame" style={{ display: 'none' }} />
       </div>
-      {/* OVERLAY para carregando/sucesso/erro */}
-      {(loading || statusMsg) && (
-        <div className="overlay">
-          <div className={`status-modal ${loading ? "loading" : statusMsg?.type}`}>
-            {loading
-              ? <><div className="loader" /> Enviando, aguarde...</>
-              : statusMsg?.text
-            }
-          </div>
-        </div>
-      )}
       <style jsx>{`
-        html, body, #__next, .app {
-          margin: 0; padding: 0; box-sizing: border-box;
-          width: 100vw; height: 100vh;
-          min-height: 100vh; min-width: 100vw;
-          overflow: hidden !important; /* só o form rola! */
-        }
-        .app { position: relative; width: 100vw; height: 100vh; overflow: hidden; font-family: 'Inter', Arial, sans-serif;}
+        .app, html, body { margin: 0; padding: 0; box-sizing: border-box; }
+        .app { position: relative; width: 100vw; height: 100vh; overflow: hidden; font-family: 'Inter', Arial, sans-serif; }
         .pixel-art { image-rendering: pixelated; }
         .sky { position: absolute; inset: 0;
           background: linear-gradient(180deg, #2e7dd8 0%, #72c3fc 55%, #ffffff 100%);
@@ -240,7 +222,7 @@ export default function Home() {
           80%  { left: 90vw;  top:10%;}
           100% { left: 115vw; top:11%; opacity:0.1;}
         }
-        .ground { position: absolute; bottom: 0; left: 0; width: 200%; height: 88px; background: url('/chão-pixel.png') repeat-x bottom; background-size: auto 88px; animation: groundScroll 13s linear infinite; z-index: 2;}
+        .ground { position: absolute; bottom: 0; left: 0; width: 200%; height: 88px; background: url('/chao-pixel.png') repeat-x bottom; background-size: auto 88px; animation: groundScroll 13s linear infinite; z-index: 2;}
         @keyframes groundScroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
         .workers { position: absolute; right:7vw; left: auto; display: flex; align-items: flex-end; gap: 54px; width: 790px; animation: workersScroll 13s linear infinite; z-index: 3;}
         .workers { bottom: 70px; }
@@ -250,28 +232,26 @@ export default function Home() {
         .car { position: absolute; left: 53vw; transform: translateX(-50%); width: 170px; animation: carBounce 1.05s ease-in-out infinite alternate; z-index: 4;}
         .car { bottom: 69px; }
         @keyframes carBounce { to { transform: translate(-50%, -7px);} }
-
-        /* FORMULÁRIO CENTRAL FIXO, APENAS ELE ROLA */
         .form-wrapper {
           position: absolute; inset: 0;
           display: flex; align-items: center; justify-content: center;
           z-index: 10;
         }
         .kpi-form {
-          min-width: 340px;
+          min-width: 355px;
           max-width: 370px;
-          max-height: 94vh; /* Limita altura do card */
-          overflow-y: auto;  /* Só o formulário rola! */
+          max-height: 94vh;
           background: #fff;
           border-radius: 12px;
-          padding: 2.2rem 2.1rem 3.5rem 2.1rem; /* MAIS espaço embaixo */
-          box-shadow: 0 4px 18px #2222  ;
+          padding: 2.2rem 2.1rem 2rem 2.1rem;
+          box-shadow: 0 4px 18px #2222;
           display: flex; flex-direction: column; align-items: stretch;
           opacity: 0;
           transform: scale(.96) translateY(30px);
           transition: all .6s cubic-bezier(.77,0,.18,1);
           border: 1.5px solid #e7eaf0;
           position: relative;
+          overflow-y: auto;
         }
         .kpi-in {
           opacity: 1;
@@ -352,12 +332,8 @@ export default function Home() {
         .preview {
           margin-top: 0.59rem;
           width: 92%;
-          max-width: 330px;
-          max-height: 190px;
-          object-fit: contain;
           border-radius: 11px;
           border: 2px solid #e60000;
-          background: #fafafa;
         }
         button[type="submit"] {
           margin-top: .65rem;
@@ -372,154 +348,50 @@ export default function Home() {
           box-shadow: 0 2px 12px #e6000035;
           letter-spacing: 1px;
           transition: background 0.18s, box-shadow 0.18s, transform 0.18s;
-          margin-bottom: 1.8rem; /* para nunca grudar na borda inferior! */
         }
         button[type="submit"]:hover, button[type="submit"]:focus {
           background: #bb0000;
           box-shadow: 0 6px 18px #e6000040;
           transform: scale(1.03) translateY(-2px);
         }
-
-        /* OVERLAY MODAL */
-        .overlay {
-          position: fixed;
-          inset: 0;
-          background: rgba(22, 33, 50, 0.23);
-          z-index: 9999;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          transition: background 0.22s;
-        }
-        .status-modal {
+        .status-box {
+          margin: 1.2rem auto 0 auto;
+          max-width: 380px;
           background: #fff;
-          border-radius: 17px;
-          padding: 2.2rem 2.3rem;
-          box-shadow: 0 8px 42px #2226;
-          font-size: 1.14rem;
-          font-weight: 700;
+          border-radius: 12px;
+          padding: 1.3rem 1.2rem;
+          box-shadow: 0 4px 18px #16447522;
+          font-size: 1.08rem;
+          font-weight: 600;
           color: #194579;
           text-align: center;
-          min-width: 240px;
-          max-width: 96vw;
-          animation: pop .22s;
         }
-        @keyframes pop {
-          from { transform: scale(.85); opacity: 0; }
-          to   { transform: scale(1); opacity: 1; }
+        .status-box.success { border: 2.2px solid #3bb233; color: #217a26; }
+        .status-box.error { border: 2.2px solid #e60000; color: #e60000; }
+        .status-box.loading { border: 2.2px dashed #194579; color: #194579; }
+
+        /* ===== SCROLLBAR ESTILIZADA ===== */
+        :global(.kpi-form::-webkit-scrollbar) {
+          width: 13px;
+          background: transparent;
         }
-        .status-modal.success { border: 2.2px solid #3bb233; color: #217a26; }
-        .status-modal.error   { border: 2.2px solid #e60000; color: #e60000; }
-        .status-modal.loading { border: 2.2px dashed #194579; color: #194579; }
-
-        .loader {
-          border: 3.2px solid #e6e6e6;
-          border-top: 3.2px solid #e60000;
-          border-radius: 50%;
-          width: 28px;
-          height: 28px;
-          display: inline-block;
-          margin-bottom: 0.3rem;
-          margin-right: 0.6rem;
-          vertical-align: middle;
-          animation: spin 0.75s linear infinite;
+        :global(.kpi-form::-webkit-scrollbar-thumb) {
+          background: #e60000;                 /* Vermelho sólido */
+          border-radius: 8px;
+          border: 3px solid #f4f4f4;           /* Branco-fumaça */
+          min-height: 60px;
+          transition: background 0.2s, border 0.2s;
+          box-shadow: 0 0 6px #e6000022 inset;
         }
-        @keyframes spin {
-          0%   { transform: rotate(0deg);}
-          100% { transform: rotate(360deg);}
+        :global(.kpi-form::-webkit-scrollbar-thumb:hover) {
+          background: #b80000;                 /* Vermelho escuro */
+          border: 3px solid #ececec;
         }
-
-        @media (max-width: 600px) {
-          .kpi-form {
-            min-width: 97vw;
-            max-width: 99vw;
-            max-height: 99vh;
-            padding: 1.2rem 2vw 3.5rem 2vw; /* mais espaço inferior no mobile */
-          }
-          .preview {
-            max-width: 90vw;
-            max-height: 125px; /* preview bem menor no mobile */
-          }
-        .kpi-form::-webkit-scrollbar {
-  width: 10px;
-  background: transparent;
-}
-
-.kpi-form::-webkit-scrollbar-thumb {
-  background: rgba(230, 0, 0, 0.23);  /* Vermelho suave, semi-transparente */
-  border-radius: 8px;
-  border: 2px solid #fff;  /* Borda branca para combinar com o card */
-}
-
-.kpi-form::-webkit-scrollbar-thumb:hover {
-  background: rgba(230, 0, 0, 0.33);
-}
-
-.kpi-form::-webkit-scrollbar-track {
-  background: transparent;
-}
-:global(.kpi-form::-webkit-scrollbar) {
-  width: 11px;
-  background: transparent;
-}
-:global(.kpi-form::-webkit-scrollbar-thumb) {
-  background: rgba(230, 0, 0, 0.19);  /* Vermelho suave */
-  border-radius: 8px;
-  border: 2.5px solid #fff;           /* Borda branca do card */
-  min-height: 60px;
-  transition: background 0.2s;
-}
-:global(.kpi-form::-webkit-scrollbar-thumb:hover) {
-  background: rgba(230, 0, 0, 0.35);
-}
-:global(.kpi-form::-webkit-scrollbar-track) {
-  background: transparent;
-}
-:global(.kpi-form::-webkit-scrollbar) {
-  width: 10px;
-  background: transparent;
-}
-
-:global(.kpi-form::-webkit-scrollbar-thumb) {
-  background: rgba(230,0,0,0.09);     /* Mais clara ainda */
-  border-radius: 8px;
-  border: 2.5px solid #fff;
-  min-height: 60px;
-  transition: background 0.2s;
-}
-
-:global(.kpi-form::-webkit-scrollbar-thumb:hover) {
-  background: rgba(230,0,0,0.21);
-}
-
-:global(.kpi-form::-webkit-scrollbar-track) {
-  background: transparent;
-}
-:global(.kpi-form::-webkit-scrollbar) {
-  width: 12px;
-  background: transparent;
-}
-
-:global(.kpi-form::-webkit-scrollbar-thumb) {
-  background: #e60000;               /* Vermelho sólido */
-  border-radius: 8px;
-  border: 2.5px solid #f4f4f4;       /* Branco-fumaça */
-  min-height: 60px;
-  transition: background 0.2s, border 0.2s;
-  box-shadow: 0 0 6px #e6000022 inset;
-}
-
-:global(.kpi-form::-webkit-scrollbar-thumb:hover) {
-  background: #b80000;               /* Vermelho escuro no hover */
-  border: 2.5px solid #ececec;       /* Um branco mais fechado ainda */
-}
-
-:global(.kpi-form::-webkit-scrollbar-track) {
-  background: #f7f7f7;               /* Branco mais escuro (fundo da barra) */
-  border-radius: 7px;
-}
-      `}
-      </style>
+        :global(.kpi-form::-webkit-scrollbar-track) {
+          background: #f7f7f7;
+          border-radius: 7px;
+        }
+      `}</style>
     </>
   )
 }
