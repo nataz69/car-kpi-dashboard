@@ -440,7 +440,24 @@ export default function Home() {
             max-width: 90vw;
             max-height: 125px; /* preview bem menor no mobile */
           }
-        }
+        .kpi-form::-webkit-scrollbar {
+  width: 10px;
+  background: transparent;
+}
+
+.kpi-form::-webkit-scrollbar-thumb {
+  background: rgba(230, 0, 0, 0.23);  /* Vermelho suave, semi-transparente */
+  border-radius: 8px;
+  border: 2px solid #fff;  /* Borda branca para combinar com o card */
+}
+
+.kpi-form::-webkit-scrollbar-thumb:hover {
+  background: rgba(230, 0, 0, 0.33);
+}
+
+.kpi-form::-webkit-scrollbar-track {
+  background: transparent;
+}
       `}
       </style>
     </>
