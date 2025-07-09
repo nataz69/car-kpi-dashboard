@@ -1,26 +1,30 @@
 import Head from 'next/head'
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 
 export default function Home() {
   const [previewSrc, setPreviewSrc] = useState(null)
   const [boxVisible, setBoxVisible] = useState(false)
-  const [loading, setLoading] = useState(false)
-  const [statusMsg, setStatusMsg] = useState(null)
-  const fileInputRef = useRef()
-  const [fileName, setFileName] = useState('Nenhum arquivo selecionado')
-
+  const [loading, setLoading] = useState(false);
+  const [statusMsg, setStatusMsg] = useState(null); // { type: "success" | "error", text: "..." }
+  
   useEffect(() => {
-    setTimeout(() => setBoxVisible(true), 200)
+    setTimeout(() => setBoxVisible(true), 400)
   }, [])
 
-  // Gera várias nuvens para preencher o céu
-  const clouds = Array.from({ length: 18 }).map((_, i) => ({
-    top: `${7 + ((i * 19) % 29)}%`,
-    left: `${-220 + (i * 150)}px`,
-    dur: `${33 + (i % 5) * 6 + Math.random() * 5}s`,
-    z: (i % 4 === 0 ? 2 : 1),
-    opacity: 0.65 + 0.17 * (i % 3)
-  }))
+  const clouds = [
+    { top: '12%', left: '-150px', dur: '37s', z: 1 },
+    { top: '26%', left: '-600px', dur: '48s', z: 1 },
+    { top: '6%',  left: '-1100px', dur: '42s', z: 1 },
+    { top: '32%', left: '-1700px', dur: '53s', z: 1 },
+    { top: '18%', left: '-2100px', dur: '57s', z: 1 },
+    { top: '22%', left: '-900px', dur: '43s', z: 2 },
+    { top: '10%', left: '-250px', dur: '51s', z: 2 },
+    { top: '30%', left: '-1300px', dur: '41s', z: 2 },
+    { top: '16%', left: '-1900px', dur: '49s', z: 2 },
+    { top: '8%',  left: '-2300px', dur: '55s', z: 2 },
+    { top: '25%', left: '-700px', dur: '59s', z: 1 },
+    { top: '20%', left: '-300px', dur: '46s', z: 2 },
+  ]
 
   return (
     <>
@@ -33,38 +37,42 @@ export default function Home() {
         {clouds.map((c, i) => (
           <div
             key={i}
-            className="cloud"
+            className={`cloud cloud${i}`}
             style={{
               top: c.top,
               left: c.left,
               animationDuration: c.dur,
               zIndex: c.z,
-              opacity: c.opacity,
-              animationDelay: `${i * 2.2}s`,
+              opacity: c.z === 1 ? 0.85 : 0.7 + (i % 3) * 0.08,
+              filter: c.z === 2 ? 'blur(1px)' : undefined,
             }}
           />
         ))}
         <img src="/logo-mse.png" alt="Logo MSE" className="logo-cloud" />
-        
-        {/* CHÃO-PÍXEL */}
-        <div className="ground-area">
-          <div className="ground" />
-          <div className="workers">
-            {[1,2,3,4,5].map(i => (
-              <img
-                key={i}
-                src={`/trabalhador_${i}-removebg-preview.png`}
-                alt={`Trabalhador ${i}`}
-                className="worker pixel-art"
-                style={{ height: '62px' }}
-              />
-            ))}
-            <img src="/car-pixel.png" alt="Carro Pixel" className="car pixel-art" style={{ height: '70px', margin: '0 12px' }} />
-            <img src="/trator-pixel.png" alt="Máquina" className="machine pixel-art" style={{ height: '98px', marginLeft: '16px' }} />
-          </div>
+        <div className="ground" />
+        <div className="workers" style={{ bottom: 70 }}>
+          {[1,2,3,4,5].map(i => (
+            <img
+              key={i}
+              src={`/trabalhador_${i}-removebg-preview.png`}
+              alt={`Trabalhador ${i}`}
+              className="worker pixel-art"
+            />
+          ))}
+          <img
+            src="/trator-pixel.png"
+            alt="Máquina"
+            className="machine pixel-art"
+            style={{ width: 125 }}
+          />
         </div>
+        <img
+          src="/car-pixel.png"
+          alt="Carro Pixel"
+          className="car pixel-art"
+          style={{ bottom: 69 }}
+        />
 
-        {/* FORMULÁRIO MAIS COMPACTO, UPLOAD BONITO */}
         <div className="form-wrapper">
           <form
             className={`kpi-form ${boxVisible ? 'kpi-in' : ''}`}
@@ -73,60 +81,58 @@ export default function Home() {
               e.preventDefault();
               setLoading(true);
               setStatusMsg(null);
-
               const formData = new FormData(e.target);
               const file = formData.get('photo');
-              let base64Data = "";
-              let photoType = "";
-              let photoName = "";
-
-              if (file && file.size > 0) {
-                const toBase64 = file => new Promise((resolve, reject) => {
-                  const reader = new FileReader();
-                  reader.readAsDataURL(file);
-                  reader.onload = () => resolve(reader.result);
-                  reader.onerror = reject;
-                });
-                const base64 = await toBase64(file);
-                base64Data = base64.split(',')[1];
-                photoType = file.type;
-                photoName = file.name || "painel.jpg";
+              if (!file) {
+                alert("Por favor, selecione uma foto.");
+                setLoading(false);
+                return;
               }
-
-              const res = await fetch("https://script.google.com/macros/s/AKfycbyEiNs6ttPbr6XPggLIHBqtNCHkgjjITw8-HOI6IpUck8359HWkq4AW8QZgA1sTbDZq/exec", {
+              const toBase64 = file => new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = reject;
+              });
+              const base64 = await toBase64(file);
+              const base64Data = base64.split(',')[1];
+              const photoType = file.type;
+              const photoName = file.name || "painel.jpg";
+              const res = await fetch("/api/enviar-kpi", {
                 method: "POST",
                 body: JSON.stringify({
-                  obra: formData.get('obra'),
-                  model: formData.get('model'),
                   plate: formData.get('plate'),
+                  model: formData.get('model'),
                   responsible: formData.get('responsible'),
                   km: formData.get('km'),
-                  observacao: formData.get('observacao'),
+                  obra: formData.get('obra'),
                   photoBase64: base64Data,
                   photoType,
                   photoName
                 }),
-                headers: { "Content-Type": "application/json" }
+                headers: {
+                  "Content-Type": "application/json"
+                }
               });
               const result = await res.json();
-              setLoading(false);
               if (result.success) {
-                setStatusMsg({ type: "success", text: "Enviado com sucesso! Dados registrados." });
+                setLoading(false);
+                setStatusMsg({ type: "success", text: "Enviado com sucesso! Foto salva no Drive." });
                 e.target.reset();
                 setPreviewSrc(null);
-                setFileName('Nenhum arquivo selecionado')
               } else {
+                setLoading(false);
                 setStatusMsg({ type: "error", text: "Erro ao enviar: " + result.error });
               }
             }}
           >
-            <h1>
-              <span style={{ color: "#111", fontWeight: 900 }}>Envio de</span> <span className="red-detail">KPI de KM</span>
+            <h1 className="form-title">
+              Envio de <span className="red-detail">KPI de KM</span>
             </h1>
             <div className="fields">
               <div className="input-group">
                 <label htmlFor="plate">Placa</label>
-                <input id="plate" name="plate" type="text" required placeholder="ABC-1234" />
+                <input id="plate" name="plate" type="text" required placeholder="ABC-1234"/>
               </div>
               <div className="input-group">
                 <label htmlFor="model">Veículo/Modelo</label>
@@ -145,28 +151,18 @@ export default function Home() {
                 <input id="km" name="km" type="number" min="0" required placeholder="0"/>
               </div>
               <div className="input-group">
-                <label htmlFor="observacao">Observação</label>
-                <textarea id="observacao" name="observacao" rows={2} placeholder="Opcional"></textarea>
-              </div>
-              <div className="input-group">
-                <label htmlFor="photo">Foto do Painel (opcional)</label>
-                <div className="custom-upload">
-                  <button type="button" className="upload-btn" onClick={() => fileInputRef.current.click()}>Escolher Arquivo</button>
-                  <span className="file-label">{fileName}</span>
-                  <input
-                    id="photo"
-                    name="photo"
-                    type="file"
-                    accept="image/*"
-                    ref={fileInputRef}
-                    onChange={e => {
-                      const f = e.target.files[0]
-                      setPreviewSrc(f ? URL.createObjectURL(f) : null)
-                      setFileName(f ? f.name : 'Nenhum arquivo selecionado')
-                    }}
-                    style={{ display: 'none' }}
-                  />
-                </div>
+                <label htmlFor="photo">Foto do Painel</label>
+                <input
+                  id="photo"
+                  name="photo"
+                  type="file"
+                  required
+                  accept="image/*"
+                  onChange={e => {
+                    const f = e.target.files[0]
+                    setPreviewSrc(f ? URL.createObjectURL(f) : null)
+                  }}
+                />
               </div>
               {previewSrc && (
                 <div className="preview-wrap">
@@ -178,250 +174,222 @@ export default function Home() {
                 </div>
               )}
             </div>
-            <button type="submit" className="submit-btn">
+            <button type="submit">
               <span role="img" aria-label="car">🚗</span> Enviar KPI
             </button>
           </form>
-          {(loading || statusMsg) && (
-            <div className="modal-overlay">
-              <div className={`status-modal${loading ? " loading" : ""}${statusMsg ? " " + statusMsg.type : ""}`}>
-                {loading
-                  ? (<><span className="loader"></span> Enviando, aguarde...</>)
-                  : statusMsg?.text
-                }
-              </div>
+          {loading && (
+            <div className="status-box loading">
+              Enviando, aguarde...
+            </div>
+          )}
+          {statusMsg && (
+            <div className={`status-box ${statusMsg.type}`}>
+              {statusMsg.text}
             </div>
           )}
         </div>
+        <iframe name="hiddenFrame" style={{ display: 'none' }} />
       </div>
       <style jsx>{`
-        html, body, #__next, .app { height: 100%; width: 100%; }
-        .app {
-          position: relative;
-          width: 100vw; height: 100vh;
-          overflow: hidden;
-          font-family: 'Inter', Arial, sans-serif;
-        }
+        .app, html, body { margin: 0; padding: 0; box-sizing: border-box; }
+        .app { position: relative; width: 100vw; height: 100vh; overflow: hidden; font-family: 'Inter', Arial, sans-serif; }
         .pixel-art { image-rendering: pixelated; }
         .sky { position: absolute; inset: 0;
           background: linear-gradient(180deg, #2e7dd8 0%, #72c3fc 55%, #ffffff 100%);
           z-index: 0;
         }
         .cloud {
-          position: absolute; width: 180px; height: 100px; background: url('/cloud-pixel.png') no-repeat center; background-size: contain;
+          position: absolute;
+          width: 180px; height: 100px;
+          background: url('/cloud-pixel.png') no-repeat center;
+          background-size: contain;
           animation: cloudsMove linear infinite;
           z-index: 1;
-          transition: opacity 1.5s linear;
+          -webkit-mask-image: linear-gradient(90deg, #000 80%, transparent 99%);
+          mask-image: linear-gradient(90deg, #000 80%, transparent 99%);
         }
         @keyframes cloudsMove {
-          0% { transform: translateX(0); opacity: 1;}
-          89% { opacity: 1; }
-          100% { transform: translateX(120vw); opacity: 0; }
+          from { transform: translateX(0); opacity: 1; }
+          to   { transform: translateX(120vw); opacity: 0; }
         }
-        .logo-cloud { position: absolute; width: 108px; left: 8vw; top: 10%; z-index: 2;}
-        
-        /* CHÃO COM PIXEL-ART */
-        .ground-area {
-          position: absolute;
-          bottom: 0; left: 0; right: 0;
-          height: 122px;
-          z-index: 30;
-          pointer-events: none;
+        .logo-cloud { position: absolute; width: 108px; left: 8vw; top: 10%; z-index: 2; animation: logoCloudFloat 39s linear infinite;}
+        @keyframes logoCloudFloat {
+          0%   { left: 8vw;   top:10%;  opacity:1;}
+          12%  { left: 18vw;  top:15%;}
+          41%  { left: 33vw;  top:13%;}
+          60%  { left: 65vw;  top:16%;}
+          80%  { left: 90vw;  top:10%;}
+          100% { left: 115vw; top:11%; opacity:0.1;}
         }
-        .ground {
-          width: 100vw;
-          height: 88px;
-          background: url('/chao-pixel.png') repeat-x bottom;
-          background-size: auto 88px;
-          animation: groundScroll 13s linear infinite;
-          position: absolute;
-          left: 0; right: 0; bottom: 0;
-          z-index: 31;
-        }
+        .ground { position: absolute; bottom: 0; left: 0; width: 200%; height: 88px; background: url('/chao-pixel.png') repeat-x bottom; background-size: auto 88px; animation: groundScroll 13s linear infinite; z-index: 2;}
         @keyframes groundScroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
-        .workers {
-          display: flex; align-items: flex-end; gap: 38px;
-          position: absolute;
-          left: 18vw;
-          bottom: 0px;
-          z-index: 34;
-          pointer-events: none;
-        }
-        .worker, .car, .machine {
-          display: inline-block;
-          vertical-align: bottom;
-          user-select: none;
-        }
-        .car { margin: 0 16px; }
-        .machine { margin-left: 18px;}
-        
-        /* FORMULÁRIO MAIS COMPACTO, SOFISTICADO, SCROLLBAR SÓ INTERNA */
+        .workers { position: absolute; right:7vw; left: auto; display: flex; align-items: flex-end; gap: 54px; width: 790px; animation: workersScroll 13s linear infinite; z-index: 3;}
+        .workers { bottom: 70px; }
+        .worker { width: 58px;}
+        .machine { width: 125px; }
+        @keyframes workersScroll { from { transform: translateX(100%); } to { transform: translateX(-100%); } }
+        .car { position: absolute; left: 53vw; transform: translateX(-50%); width: 170px; animation: carBounce 1.05s ease-in-out infinite alternate; z-index: 4;}
+        .car { bottom: 69px; }
+        @keyframes carBounce { to { transform: translate(-50%, -7px);} }
         .form-wrapper {
-          position: absolute;
-          inset: 0;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          z-index: 50;
-          pointer-events: none;
+          position: absolute; inset: 0;
+          display: flex; align-items: center; justify-content: center;
+          z-index: 10;
         }
         .kpi-form {
-          min-width: 320px;
+          min-width: 355px;
           max-width: 370px;
-          max-height: 500px;
-          width: 94vw;
+          max-height: 94vh;
           background: #fff;
-          border-radius: 19px;
-          padding: 2.1rem 2.0rem 2.0rem 2.0rem;
-          box-shadow: 0 8px 32px #0000002b, 0 2px 14px 0 #e6000022;
+          border-radius: 12px;
+          padding: 2.2rem 2.1rem 2rem 2.1rem;
+          box-shadow: 0 4px 18px #2222;
           display: flex; flex-direction: column; align-items: stretch;
           opacity: 0;
-          transform: scale(.97) translateY(22px);
-          transition: all .7s cubic-bezier(.77,0,.18,1);
-          border: 1.5px solid #e2e6ef;
+          transform: scale(.96) translateY(30px);
+          transition: all .6s cubic-bezier(.77,0,.18,1);
+          border: 1.5px solid #e7eaf0;
           position: relative;
           overflow-y: auto;
-          pointer-events: auto;
         }
         .kpi-in {
           opacity: 1;
           transform: scale(1) translateY(0);
-          animation: formPop .6s cubic-bezier(.56,-0.37,.61,1.29);
+          animation: formPop .58s cubic-bezier(.56,-0.37,.61,1.29);
         }
         @keyframes formPop {
-          0% { opacity:0; transform: scale(.93) translateY(28px);}
-          75% { opacity:1; transform: scale(1.03) translateY(-8px);}
+          0% { opacity:0; transform: scale(.94) translateY(38px);}
+          75% { opacity:1; transform: scale(1.03) translateY(-9px);}
           100% { opacity:1; transform: scale(1) translateY(0);}
         }
-        .kpi-form h1 {
-          margin: 0 0 1.0rem 0;
-          font-size: 1.18rem;
-          font-weight: 900;
-          letter-spacing: .07rem;
+        .form-title {
+          margin: 0 0 1.4rem 0;
+          font-size: 1.26rem;
+          font-weight: 800;
+          letter-spacing: .01rem;
+          color: #222;
           text-align: center;
         }
-        .red-detail { color: #e60000; }
-        .fields { display: flex; flex-direction: column; gap: 1.02rem; margin-bottom: 0.95rem; }
-        .input-group { display: flex; flex-direction: column; gap: 0.20rem; }
-        .input-group label { color: #161a23; font-weight: 700; font-size: 1rem; margin-bottom: 1px; }
-        .input-group input[type="text"], .input-group input[type="number"], .input-group textarea {
-          padding: 0.79rem 1rem;
+        .red-detail { color: #e60000; font-weight: 800; }
+        .fields {
+          display: flex;
+          flex-direction: column;
+          gap: 1.1rem;
+          margin-bottom: 1.15rem;
+        }
+        .input-group {
+          display: flex;
+          flex-direction: column;
+          gap: 0.22rem;
+        }
+        .input-group label {
+          color: #222;
+          font-weight: 600;
+          font-size: 1.01rem;
+          margin-bottom: 2px;
+          transition: color .2s;
+        }
+        .input-group input[type="text"]:focus + label,
+        .input-group input[type="number"]:focus + label {
+          color: #e60000;
+        }
+        .input-group input[type="text"],
+        .input-group input[type="number"] {
+          padding: 0.82rem 0.9rem;
           border-radius: 8px;
-          border: 2px solid #e60000;
+          border: 1.5px solid #e60000;
           font-size: 1.02rem;
           color: #222;
+          background: #fafbfc;
           font-family: inherit;
-          font-weight: 700;
-          background: #fff;
-          transition: border 0.18s, box-shadow 0.18s;
+          font-weight: 600;
+          letter-spacing: .3px;
+          transition: border 0.2s, box-shadow 0.22s;
           outline: none;
+          box-shadow: 0 1.5px 7px #e6000020;
         }
         .input-group input[type="text"]:focus,
-        .input-group input[type="number"]:focus,
-        .input-group textarea:focus {
-          border-color: #b00000;
-          background: #f8f9fa;
+        .input-group input[type="number"]:focus {
+          border-color: #111;
+          box-shadow: 0 3px 14px #e6000033, 0 2px 4px #e6000015;
         }
-        /* ==== Custom Upload ==== */
-        .custom-upload {
-          display: flex; align-items: center; gap: 0.68rem;
-          margin-top: 2px;
-        }
-        .upload-btn {
-          background: #e60000;
+        .input-group input[type="file"] { margin-top: 2px; color: #e60000; font-weight: 600;}
+        .input-group input[type="file"]::-webkit-file-upload-button {
           color: #fff;
+          background: #e60000;
           border: none;
-          padding: 0.55rem 1.13rem;
           border-radius: 7px;
-          font-weight: 800;
-          font-size: 1rem;
-          box-shadow: 0 1px 9px #e6000012;
+          padding: 6px 14px;
           cursor: pointer;
-          transition: background .15s;
+          font-weight: 600;
+          transition: background 0.2s;
         }
-        .upload-btn:hover, .upload-btn:focus { background: #b00000; }
-        .file-label {
-          font-size: 0.95rem;
-          color: #666;
-          font-weight: 500;
-          max-width: 120px;
-          overflow-x: hidden;
-          text-overflow: ellipsis;
-          white-space: nowrap;
+        .input-group input[type="file"]:hover::-webkit-file-upload-button {
+          background: #bb0000;
         }
         .preview-wrap { text-align: center; }
         .preview {
-          margin-top: 0.50rem;
+          margin-top: 0.59rem;
           width: 92%;
-          border-radius: 10px;
+          border-radius: 11px;
           border: 2px solid #e60000;
         }
-        .submit-btn {
-          margin-top: 1.3rem;
-          padding: 1.08rem 0;
+        button[type="submit"] {
+          margin-top: .65rem;
           background: #e60000;
-          border: none;
           color: #fff;
           font-size: 1.13rem;
-          font-weight: 800;
-          border-radius: 12px;
-          box-shadow: 0 3.5px 18px #e6000023, 0 1px 4px #e6000010;
+          font-weight: bold;
+          padding: .83rem 0;
+          border: none;
+          border-radius: 8px;
           cursor: pointer;
-          width: 100%;
-          letter-spacing: .07rem;
-          transition: background .13s;
-          outline: none;
-          border-bottom: 4px solid #b00000;
+          box-shadow: 0 2px 12px #e6000035;
+          letter-spacing: 1px;
+          transition: background 0.18s, box-shadow 0.18s, transform 0.18s;
         }
-        .submit-btn:active,
-        .submit-btn:focus { background: #b00000; }
-        .modal-overlay {
-          position: fixed; z-index: 9999; top: 0; left: 0; right: 0; bottom: 0;
-          width: 100vw; height: 100vh;
-          display: flex; align-items: center; justify-content: center;
-          background: rgba(30,30,30,0.13); transition: background 0.18s; pointer-events: all;
+        button[type="submit"]:hover, button[type="submit"]:focus {
+          background: #bb0000;
+          box-shadow: 0 6px 18px #e6000040;
+          transform: scale(1.03) translateY(-2px);
         }
-        .status-modal {
-          background: #fff; border-radius: 14px; padding: 2.2rem 2.3rem;
-          box-shadow: 0 8px 24px #0002; font-size: 1.09rem; font-weight: 700; min-width: 230px; max-width: 96vw; text-align: center; border: 2.2px solid #e60000; color: #194579; animation: pop .22s;
+        .status-box {
+          margin: 1.2rem auto 0 auto;
+          max-width: 380px;
+          background: #fff;
+          border-radius: 12px;
+          padding: 1.3rem 1.2rem;
+          box-shadow: 0 4px 18px #16447522;
+          font-size: 1.08rem;
+          font-weight: 600;
+          color: #194579;
+          text-align: center;
         }
-        .status-modal.success { border: 2.2px solid #3bb233; color: #217a26; }
-        .status-modal.error   { border: 2.2px solid #e60000; color: #e60000; }
-        .status-modal.loading { border: 2.2px dashed #194579; }
-        .loader {
-          display: inline-block;
-          width: 22px;
-          height: 22px;
-          border: 4px solid #e60000;
-          border-top: 4px solid #fff;
-          border-radius: 50%;
-          animation: spin 0.85s linear infinite;
-          margin-right: 13px;
-          vertical-align: -6px;
-        }
-        @keyframes spin { 100% { transform: rotate(360deg); } }
-        /* === SCROLLBAR BONITA NO FORMULÁRIO === */
-        .kpi-form::-webkit-scrollbar {
-          width: 11px;
+        .status-box.success { border: 2.2px solid #3bb233; color: #217a26; }
+        .status-box.error { border: 2.2px solid #e60000; color: #e60000; }
+        .status-box.loading { border: 2.2px dashed #194579; color: #194579; }
+
+        /* ===== SCROLLBAR ESTILIZADA ===== */
+        :global(.kpi-form::-webkit-scrollbar) {
+          width: 13px;
           background: transparent;
         }
-        .kpi-form::-webkit-scrollbar-thumb {
-          background: #e60000;
-          border-radius: 10px;
-          border: 3px solid #fff;
+        :global(.kpi-form::-webkit-scrollbar-thumb) {
+          background: #e60000;                 /* Vermelho sólido */
+          border-radius: 8px;
+          border: 3px solid #f4f4f4;           /* Branco-fumaça */
+          min-height: 60px;
+          transition: background 0.2s, border 0.2s;
+          box-shadow: 0 0 6px #e6000022 inset;
         }
-        .kpi-form::-webkit-scrollbar-track {
-          background: transparent;
+        :global(.kpi-form::-webkit-scrollbar-thumb:hover) {
+          background: #b80000;                 /* Vermelho escuro */
+          border: 3px solid #ececec;
         }
-        /* Para Firefox */
-        .kpi-form {
-          scrollbar-color: #e60000 #fff;
-          scrollbar-width: thin;
-        }
-        @media (max-width: 700px) {
-          .form-wrapper { padding: 0; }
-          .kpi-form { min-width: 0; width: 100vw; max-width: 99vw; max-height: 83vh; padding: 2.1rem 0.5rem; }
-          .ground-area .workers { left: 2vw; }
+        :global(.kpi-form::-webkit-scrollbar-track) {
+          background: #f7f7f7;
+          border-radius: 7px;
         }
       `}</style>
     </>
