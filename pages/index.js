@@ -1,24 +1,26 @@
+// pages/index.js
 import Head from 'next/head'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 
 export default function Home() {
   const [previewSrc, setPreviewSrc] = useState(null)
   const [boxVisible, setBoxVisible] = useState(false)
   const [loading, setLoading] = useState(false)
   const [statusMsg, setStatusMsg] = useState(null)
+  const fileInputRef = useRef()
+  const [fileName, setFileName] = useState('Nenhum arquivo selecionado')
 
   useEffect(() => {
     setTimeout(() => setBoxVisible(true), 200)
   }, [])
 
-  const clouds = [
-    { top: '12%', left: '-150px', dur: '37s', z: 1 },
-    { top: '26%', left: '-600px', dur: '48s', z: 1 },
-    { top: '6%',  left: '-1100px', dur: '42s', z: 1 },
-    { top: '32%', left: '-1700px', dur: '53s', z: 1 },
-    { top: '18%', left: '-2100px', dur: '57s', z: 1 },
-    { top: '22%', left: '-900px', dur: '43s', z: 2 }
-  ]
+  // Gera entre 16 e 32 nuvens
+  const clouds = Array.from({ length: 22 }).map((_, i) => ({
+    top: `${8 + (i % 9) * 7}%`,
+    left: `${-240 + (i * 110)}px`,
+    dur: `${35 + (i % 6) * 7 + Math.random() * 8}s`,
+    z: (i % 5 === 0 ? 2 : 1)
+  }))
 
   return (
     <>
@@ -37,8 +39,9 @@ export default function Home() {
               left: c.left,
               animationDuration: c.dur,
               zIndex: c.z,
-              opacity: c.z === 1 ? 0.85 : 0.7 + (i % 3) * 0.08,
-              filter: c.z === 2 ? 'blur(1px)' : undefined,
+              opacity: c.z === 2 ? 0.75 : 0.92,
+              filter: c.z === 2 ? 'blur(0.8px)' : undefined,
+              animationDelay: `${i * 2.7}s`,
             }}
           />
         ))}
@@ -51,13 +54,14 @@ export default function Home() {
               src={`/trabalhador_${i}-removebg-preview.png`}
               alt={`Trabalhador ${i}`}
               className="worker pixel-art"
+              style={{ height: '62px', marginBottom: '-2px' }}
             />
           ))}
-          <img src="/trator-pixel.png" alt="Máquina" className="machine pixel-art" />
+          <img src="/trator-pixel.png" alt="Máquina" className="machine pixel-art" style={{ height: '104px' }} />
         </div>
-        <img src="/car-pixel.png" alt="Carro Pixel" className="car pixel-art" />
-        
-        {/* FORMULÁRIO COM SCROLL INTERNO */}
+        <img src="/car-pixel.png" alt="Carro Pixel" className="car pixel-art" style={{ height: '72px' }} />
+
+        {/* FORMULÁRIO MAIS COMPACTO, UPLOAD BONITO */}
         <div className="form-wrapper">
           <form
             className={`kpi-form ${boxVisible ? 'kpi-in' : ''}`}
@@ -86,7 +90,8 @@ export default function Home() {
                 photoName = file.name || "painel.jpg";
               }
 
-              const res = await fetch("/api/enviar-kpi", {
+              // Use o endpoint que você passou!
+              const res = await fetch("https://script.google.com/macros/s/AKfycbyEiNs6ttPbr6XPggLIHBqtNCHkgjjITw8-HOI6IpUck8359HWkq4AW8QZgA1sTbDZq/exec", {
                 method: "POST",
                 body: JSON.stringify({
                   obra: formData.get('obra'),
@@ -107,13 +112,14 @@ export default function Home() {
                 setStatusMsg({ type: "success", text: "Enviado com sucesso! Dados registrados." });
                 e.target.reset();
                 setPreviewSrc(null);
+                setFileName('Nenhum arquivo selecionado')
               } else {
                 setStatusMsg({ type: "error", text: "Erro ao enviar: " + result.error });
               }
             }}
           >
             <h1>
-              Envio de <span className="red-detail">KPI de KM</span>
+              <span style={{ color: "#111", fontWeight: 900 }}>Envio de</span> <span className="red-detail">KPI de KM</span>
             </h1>
             <div className="fields">
               <div className="input-group">
@@ -142,17 +148,23 @@ export default function Home() {
               </div>
               <div className="input-group">
                 <label htmlFor="photo">Foto do Painel (opcional)</label>
-                <input
-                  id="photo"
-                  name="photo"
-                  type="file"
-                  accept="image/*"
-                  onChange={e => {
-                    const f = e.target.files[0]
-                    setPreviewSrc(f ? URL.createObjectURL(f) : null)
-                  }}
-                  style={{padding: '0.5rem 0'}}
-                />
+                <div className="custom-upload">
+                  <button type="button" className="upload-btn" onClick={() => fileInputRef.current.click()}>Escolher Arquivo</button>
+                  <span className="file-label">{fileName}</span>
+                  <input
+                    id="photo"
+                    name="photo"
+                    type="file"
+                    accept="image/*"
+                    ref={fileInputRef}
+                    onChange={e => {
+                      const f = e.target.files[0]
+                      setPreviewSrc(f ? URL.createObjectURL(f) : null)
+                      setFileName(f ? f.name : 'Nenhum arquivo selecionado')
+                    }}
+                    style={{ display: 'none' }}
+                  />
+                </div>
               </div>
               {previewSrc && (
                 <div className="preview-wrap">
@@ -179,7 +191,6 @@ export default function Home() {
             </div>
           )}
         </div>
-        <iframe name="hiddenFrame" style={{ display: 'none' }} />
       </div>
       <style jsx>{`
         html, body, #__next, .app { height: 100%; width: 100%; }
@@ -194,18 +205,16 @@ export default function Home() {
           background: linear-gradient(180deg, #2e7dd8 0%, #72c3fc 55%, #ffffff 100%);
           z-index: 0;
         }
-        .cloud { position: absolute; width: 180px; height: 100px; background: url('/cloud-pixel.png') no-repeat center; background-size: contain; animation: cloudsMove linear infinite; z-index: 1;}
-        @keyframes cloudsMove { from { transform: translateX(0); } to { transform: translateX(120vw); } }
-        .logo-cloud { position: absolute; width: 108px; left: 8vw; top: 10%; z-index: 2; animation: logoCloudFloat 39s linear infinite;}
-        @keyframes logoCloudFloat {
-          0%   { left: 8vw;   top:10%;  opacity:1;}
-          12%  { left: 18vw;  top:15%; }
-          41%  { left: 33vw;  top:13%; }
-          60%  { left: 65vw;  top:16%; }
-          80%  { left: 90vw;  top:10%; }
-          100% { left: 115vw; top:11%; opacity:0.1;}
+        .cloud {
+          position: absolute; width: 180px; height: 100px; background: url('/cloud-pixel.png') no-repeat center; background-size: contain;
+          animation: cloudsMove linear infinite, cloudFadeOut 1s linear forwards;
+          z-index: 1;
+          transition: opacity 0.7s linear;
         }
-        .ground { position: absolute; bottom: 0; left: 0; width: 200%; height: 88px; background: url('/chão-pixel.png') repeat-x bottom; background-size: auto 88px; animation: groundScroll 13s linear infinite; z-index: 2;}
+        @keyframes cloudsMove { from { transform: translateX(0); opacity: 1;} to { transform: translateX(120vw); opacity: 0; } }
+        @keyframes cloudFadeOut { from{ opacity: 1;} to { opacity: 0;}}
+        .logo-cloud { position: absolute; width: 108px; left: 8vw; top: 10%; z-index: 2;}
+        .ground { position: absolute; bottom: 0; left: 0; width: 200%; height: 88px; background: url('/chao-pixel.png') repeat-x bottom; background-size: auto 88px; animation: groundScroll 13s linear infinite; z-index: 2;}
         @keyframes groundScroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
         .workers { position: absolute; bottom: 87px; left: 0; display: flex; align-items: flex-end; gap: 54px; width: 790px; animation: workersScroll 13s linear infinite; z-index: 3;}
         .worker { width: 58px;}
@@ -213,8 +222,6 @@ export default function Home() {
         @keyframes workersScroll { from { transform: translateX(100%); } to { transform: translateX(-100%); } }
         .car { position: absolute; bottom: 86px; left: 53vw; transform: translateX(-50%); width: 170px; animation: carBounce 1.05s ease-in-out infinite alternate; z-index: 4;}
         @keyframes carBounce { to { transform: translate(-50%, -7px);} }
-
-        /* ====== FORMULÁRIO CENTRALIZADO COM SCROLL INTERNO ====== */
         .form-wrapper {
           position: absolute;
           inset: 0;
@@ -225,18 +232,18 @@ export default function Home() {
           pointer-events: none;
         }
         .kpi-form {
-          min-width: 340px;
-          max-width: 370px;
-          max-height: 530px;
+          min-width: 330px;
+          max-width: 375px;
+          max-height: 495px;
           width: 94vw;
           background: #fff;
-          border-radius: 20px;
-          padding: 2.1rem 2.1rem 2.1rem 2.1rem;
-          box-shadow: 0 6px 30px #0000001a, 0 1.5px 14px 0 #e6000022;
+          border-radius: 19px;
+          padding: 2.1rem 2.0rem 2.0rem 2.0rem;
+          box-shadow: 0 7px 36px #1d1a1a22, 0 1.5px 14px 0 #e6000022;
           display: flex; flex-direction: column; align-items: stretch;
           opacity: 0;
-          transform: scale(.96) translateY(30px);
-          transition: all .6s cubic-bezier(.77,0,.18,1);
+          transform: scale(.97) translateY(20px);
+          transition: all .7s cubic-bezier(.77,0,.18,1);
           border: 1.5px solid #e2e6ef;
           position: relative;
           overflow-y: auto;
@@ -245,29 +252,29 @@ export default function Home() {
         .kpi-in {
           opacity: 1;
           transform: scale(1) translateY(0);
-          animation: formPop .68s cubic-bezier(.56,-0.37,.61,1.29);
+          animation: formPop .6s cubic-bezier(.56,-0.37,.61,1.29);
         }
         @keyframes formPop {
-          0% { opacity:0; transform: scale(.94) translateY(38px);}
-          75% { opacity:1; transform: scale(1.03) translateY(-9px);}
+          0% { opacity:0; transform: scale(.93) translateY(28px);}
+          75% { opacity:1; transform: scale(1.03) translateY(-8px);}
           100% { opacity:1; transform: scale(1) translateY(0);}
         }
         .kpi-form h1 {
-          margin: 0 0 1.5rem 0;
-          font-size: 1.25rem;
-          font-weight: 800;
+          margin: 0 0 1.0rem 0;
+          font-size: 1.18rem;
+          font-weight: 900;
           letter-spacing: .07rem;
           text-align: center;
         }
         .red-detail { color: #e60000; }
-        .fields { display: flex; flex-direction: column; gap: 1.10rem; margin-bottom: 1.1rem; }
-        .input-group { display: flex; flex-direction: column; gap: 0.25rem; }
+        .fields { display: flex; flex-direction: column; gap: 1.02rem; margin-bottom: 0.95rem; }
+        .input-group { display: flex; flex-direction: column; gap: 0.20rem; }
         .input-group label { color: #161a23; font-weight: 700; font-size: 1rem; margin-bottom: 1px; }
         .input-group input[type="text"], .input-group input[type="number"], .input-group textarea {
-          padding: 0.85rem 1rem;
-          border-radius: 9px;
+          padding: 0.79rem 1rem;
+          border-radius: 8px;
           border: 2px solid #e60000;
-          font-size: 1.04rem;
+          font-size: 1.02rem;
           color: #222;
           font-family: inherit;
           font-weight: 700;
@@ -279,30 +286,56 @@ export default function Home() {
         .input-group input[type="number"]:focus,
         .input-group textarea:focus {
           border-color: #b00000;
-          background: #f9f9fa;
+          background: #f8f9fa;
         }
-        .input-group input[type="file"] { margin-top: 2px; color: #e60000; font-weight: 700;}
+        /* ==== Custom Upload ==== */
+        .custom-upload {
+          display: flex; align-items: center; gap: 0.68rem;
+          margin-top: 2px;
+        }
+        .upload-btn {
+          background: #e60000;
+          color: #fff;
+          border: none;
+          padding: 0.55rem 1.13rem;
+          border-radius: 7px;
+          font-weight: 800;
+          font-size: 1rem;
+          box-shadow: 0 1px 9px #e6000012;
+          cursor: pointer;
+          transition: background .15s;
+        }
+        .upload-btn:hover, .upload-btn:focus { background: #b00000; }
+        .file-label {
+          font-size: 0.95rem;
+          color: #666;
+          font-weight: 500;
+          max-width: 120px;
+          overflow-x: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
         .preview-wrap { text-align: center; }
         .preview {
-          margin-top: 0.52rem;
+          margin-top: 0.50rem;
           width: 92%;
-          border-radius: 11px;
+          border-radius: 10px;
           border: 2px solid #e60000;
         }
         .submit-btn {
-          margin-top: 1.7rem;
-          padding: 1.12rem 0;
+          margin-top: 1.3rem;
+          padding: 1.08rem 0;
           background: #e60000;
           border: none;
           color: #fff;
           font-size: 1.13rem;
           font-weight: 800;
-          border-radius: 13px;
-          box-shadow: 0 3.5px 18px #e6000026, 0 1px 4px #e6000016;
+          border-radius: 12px;
+          box-shadow: 0 3.5px 18px #e6000023, 0 1px 4px #e6000010;
           cursor: pointer;
           width: 100%;
           letter-spacing: .07rem;
-          transition: background .16s;
+          transition: background .13s;
           outline: none;
           border-bottom: 4px solid #b00000;
         }
@@ -316,7 +349,7 @@ export default function Home() {
         }
         .status-modal {
           background: #fff; border-radius: 14px; padding: 2.2rem 2.3rem;
-          box-shadow: 0 8px 24px #0002; font-size: 1.11rem; font-weight: 700; min-width: 230px; max-width: 96vw; text-align: center; border: 2.2px solid #e60000; color: #194579; animation: pop .22s;
+          box-shadow: 0 8px 24px #0002; font-size: 1.09rem; font-weight: 700; min-width: 230px; max-width: 96vw; text-align: center; border: 2.2px solid #e60000; color: #194579; animation: pop .22s;
         }
         .status-modal.success { border: 2.2px solid #3bb233; color: #217a26; }
         .status-modal.error   { border: 2.2px solid #e60000; color: #e60000; }
@@ -335,12 +368,12 @@ export default function Home() {
         @keyframes spin { 100% { transform: rotate(360deg); } }
         /* === SCROLLBAR BONITA NO FORMULÁRIO === */
         .kpi-form::-webkit-scrollbar {
-          width: 13px;
+          width: 11px;
           background: transparent;
         }
         .kpi-form::-webkit-scrollbar-thumb {
           background: #e60000;
-          border-radius: 12px;
+          border-radius: 10px;
           border: 3px solid #fff;
         }
         .kpi-form::-webkit-scrollbar-track {
@@ -353,7 +386,7 @@ export default function Home() {
         }
         @media (max-width: 700px) {
           .form-wrapper { padding: 0; }
-          .kpi-form { min-width: 0; width: 100vw; max-width: 99vw; max-height: 85vh; padding: 2.1rem 0.7rem; }
+          .kpi-form { min-width: 0; width: 100vw; max-width: 99vw; max-height: 83vh; padding: 2.1rem 0.5rem; }
         }
       `}</style>
     </>
