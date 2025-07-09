@@ -223,7 +223,7 @@ export default function Home() {
           80%  { left: 90vw;  top:10%; }
           100% { left: 115vw; top:11%; opacity:0.1;}
         }
-        .ground { position: absolute; bottom: 0; left: 0; width: 200%; height: 88px; background: url('/chao-pixel.png') repeat-x bottom; background-size: auto 88px; animation: groundScroll 13s linear infinite; z-index: 2;}
+        .ground { position: absolute; bottom: 0; left: 0; width: 200%; height: 88px; background: url('/chão-pixel.png') repeat-x bottom; background-size: auto 88px; animation: groundScroll 13s linear infinite; z-index: 2;}
         @keyframes groundScroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
         .workers { position: absolute; bottom: 87px; left: 0; display: flex; align-items: flex-end; gap: 54px; width: 790px; animation: workersScroll 13s linear infinite; z-index: 3;}
         .worker { width: 58px;}
