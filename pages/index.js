@@ -11,7 +11,6 @@ export default function Home() {
     setTimeout(() => setBoxVisible(true), 400)
   }, [])
 
-  // clouds (padrão)
   const clouds = [
     { top: '12%', left: '-150px', dur: '37s', z: 1 },
     { top: '26%', left: '-600px', dur: '48s', z: 1 },
@@ -200,6 +199,141 @@ export default function Home() {
         <iframe name="hiddenFrame" style={{ display: 'none' }} />
       </div>
       <style jsx>{`
+        /* ======== CENÁRIO ======== */
+        .app, html, body { margin: 0; padding: 0; box-sizing: border-box; background: #6fb2f7; }
+        .app { position: relative; width: 100vw; height: 100vh; overflow: hidden; font-family: 'Inter', Arial, sans-serif; }
+        .pixel-art { image-rendering: pixelated; }
+        .sky { position: absolute; inset: 0;
+          background: linear-gradient(180deg, #2e7dd8 0%, #72c3fc 55%, #ffffff 100%);
+          z-index: 0;
+        }
+        .cloud { position: absolute; width: 180px; height: 100px; background: url('/cloud-pixel.png') no-repeat center; background-size: contain; opacity: 0.83; animation: cloudsMove linear infinite; z-index: 1;}
+        .cloud1 { top: 12%; left: -150px; animation-duration: 37s;}
+        .cloud2 { top: 26%; left: -600px; animation-duration: 48s;}
+        .cloud3 { top: 6%;  left: -1100px; animation-duration: 42s;}
+        .cloud4 { top: 32%; left: -1700px; animation-duration: 53s;}
+        .cloud5 { top: 18%; left: -2100px; animation-duration: 57s;}
+        @keyframes cloudsMove { from { transform: translateX(0); } to { transform: translateX(120vw); } }
+        .logo-cloud { position: absolute; width: 108px; left: 8vw; top: 10%; z-index: 2; animation: logoCloudFloat 39s linear infinite;}
+        @keyframes logoCloudFloat {
+          0%   { left: 8vw;   top:10%;  opacity:1;}
+          12%  { left: 18vw;  top:15%; }
+          41%  { left: 33vw;  top:13%; }
+          60%  { left: 65vw;  top:16%; }
+          80%  { left: 90vw;  top:10%; }
+          100% { left: 115vw; top:11%; opacity:0.1;}
+        }
+        .ground { position: absolute; bottom: 0; left: 0; width: 200%; height: 88px; background: url('/chao-pixel.png') repeat-x bottom; background-size: auto 88px; animation: groundScroll 13s linear infinite; z-index: 2;}
+        @keyframes groundScroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+        .workers { position: absolute; bottom: 87px; left: 0; display: flex; align-items: flex-end; gap: 54px; width: 790px; animation: workersScroll 13s linear infinite; z-index: 3;}
+        .worker { width: 58px;}
+        .machine { width: 92px;}
+        @keyframes workersScroll { from { transform: translateX(100%); } to { transform: translateX(-100%); } }
+        .car { position: absolute; bottom: 86px; left: 53vw; transform: translateX(-50%); width: 170px; animation: carBounce 1.05s ease-in-out infinite alternate; z-index: 4;}
+        @keyframes carBounce { to { transform: translate(-50%, -7px);} }
+        /* ======== FORMULÁRIO SIMÉTRICO ======== */
+        .form-wrapper {
+          position: absolute; inset: 0;
+          display: flex; align-items: center; justify-content: center;
+          z-index: 10;
+        }
+        .kpi-form {
+          min-width: 355px;
+          max-width: 370px;
+          background: rgba(255,255,255,0.97);
+          border-radius: 19px;
+          padding: 2.6rem 2.2rem 2.2rem 2.2rem;
+          box-shadow: 0 7px 44px #16447540, 0 1.5px 14px 0 #e6000022;
+          display: flex; flex-direction: column; align-items: stretch;
+          opacity: 0;
+          transform: scale(.96) translateY(30px);
+          transition: all .6s cubic-bezier(.77,0,.18,1);
+          border: 1.5px solid #e7eaf0;
+          position: relative;
+        }
+        .kpi-in {
+          opacity: 1;
+          transform: scale(1) translateY(0);
+          animation: formPop .68s cubic-bezier(.56,-0.37,.61,1.29);
+        }
+        @keyframes formPop {
+          0% { opacity:0; transform: scale(.94) translateY(38px);}
+          75% { opacity:1; transform: scale(1.03) translateY(-9px);}
+          100% { opacity:1; transform: scale(1) translateY(0);}
+        }
+        .kpi-form h1 {
+          margin: 0 0 2.1rem 0;
+          font-size: 1.35rem;
+          font-weight: 800;
+          letter-spacing: .1rem;
+          text-align: center;
+        }
+        .title-main { color: #194579; font-weight: 700;}
+        .title-accent { color: #e60000; font-weight: 900; letter-spacing: .13rem;}
+        .fields {
+          display: flex;
+          flex-direction: column;
+          gap: 1.15rem;
+          margin-bottom: 1.3rem;
+        }
+        .input-group {
+          display: flex;
+          flex-direction: column;
+          gap: 0.33rem;
+        }
+        .input-group label {
+          color: #e60000;
+          font-weight: 700;
+          font-size: 1.05rem;
+          margin-bottom: 1px;
+        }
+        .input-group input[type="text"], .input-group input[type="number"], .input-group textarea {
+          padding: 0.9rem 1rem;
+          border-radius: 8px;
+          border: 1.7px solid #c5cbe0;
+          font-size: 1.04rem;
+          color: #233;
+          font-family: inherit;
+          font-weight: 700;
+          letter-spacing: .4px;
+          background: #f8fafc;
+          transition: border 0.17s, box-shadow 0.18s;
+          outline: none;
+          box-shadow: 0 1.5px 7px #e6000025;
+        }
+        .input-group input[type="text"]:focus, .input-group input[type="number"]:focus, .input-group textarea:focus {
+          border-color: #e60000;
+          background: #fff;
+          box-shadow: 0 3px 14px #e6000033, 0 2px 4px #e6000015;
+        }
+        .input-group input[type="file"] { margin-top: 2px; color: #e60000; font-weight: 700;}
+        .preview-wrap { text-align: center; }
+        .preview {
+          margin-top: 0.59rem;
+          width: 92%;
+          border-radius: 11px;
+          border: 2px solid #e60000;
+        }
+        .kpi-form button[type="submit"] {
+          margin-top: 2rem;
+          padding: 1.14rem 0;
+          background: #e60000;
+          border: none;
+          color: #fff;
+          font-size: 1.17rem;
+          font-weight: 800;
+          border-radius: 11px;
+          box-shadow: 0 3.5px 18px #e6000034, 0 1px 4px #e6000020;
+          cursor: pointer;
+          position: relative;
+          overflow: hidden;
+          letter-spacing: .09rem;
+          transition: background .16s;
+        }
+        .kpi-form button[type="submit"]:hover,
+        .kpi-form button[type="submit"]:focus {
+          background: #b00000;
+        }
         .modal-overlay {
           position: fixed;
           z-index: 9999;
@@ -228,32 +362,4 @@ export default function Home() {
         }
         .status-modal.success { border: 2.2px solid #3bb233; color: #217a26; }
         .status-modal.error   { border: 2.2px solid #e60000; color: #e60000; }
-        .status-modal.loading { border: 2.2px dashed #194579; color: #194579; }
-        .loader {
-          border: 3.2px solid #e6e6e6;
-          border-top: 3.2px solid #e60000;
-          border-radius: 50%;
-          width: 28px; height: 28px;
-          display: inline-block;
-          margin-bottom: 0.3rem;
-          margin-right: 0.6rem;
-          vertical-align: middle;
-          animation: spin 0.75s linear infinite;
-        }
-        @keyframes spin {
-          0%   { transform: rotate(0deg);}
-          100% { transform: rotate(360deg);}
-        }
-        @media (max-width: 600px) {
-          .status-modal {
-            padding: 1.1rem 0.8rem;
-            font-size: 1.07rem;
-            min-width: 0;
-            width: 98vw;
-          }
-        }
-      `}
-      </style>
-    </>
-  )
-}
+        .status-modal.loading { border:
