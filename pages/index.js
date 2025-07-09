@@ -321,6 +321,27 @@ export default function Home() {
           border-color: #111;
           box-shadow: 0 3px 14px #e6000033, 0 2px 4px #e6000015;
         }
+        /* >>>>>> ESTILO IGUAL PARA TEXTAREA <<<<<< */
+        .input-group textarea {
+          padding: 0.82rem 0.9rem;
+          border-radius: 8px;
+          border: 1.5px solid #e60000;
+          font-size: 1.02rem;
+          color: #222;
+          background: #fafbfc;
+          font-family: inherit;
+          font-weight: 600;
+          letter-spacing: .3px;
+          transition: border 0.2s, box-shadow 0.22s;
+          outline: none;
+          box-shadow: 0 1.5px 7px #e6000020;
+          resize: none;
+        }
+        .input-group textarea:focus {
+          border-color: #111;
+          background: #fff;
+          box-shadow: 0 3px 14px #e6000033, 0 2px 4px #e6000015;
+        }
         .input-group input[type="file"] { margin-top: 2px; color: #e60000; font-weight: 600;}
         .input-group input[type="file"]::-webkit-file-upload-button {
           color: #fff;
