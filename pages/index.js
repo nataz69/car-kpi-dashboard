@@ -495,6 +495,29 @@ export default function Home() {
 :global(.kpi-form::-webkit-scrollbar-track) {
   background: transparent;
 }
+:global(.kpi-form::-webkit-scrollbar) {
+  width: 12px;
+  background: transparent;
+}
+
+:global(.kpi-form::-webkit-scrollbar-thumb) {
+  background: #e60000;               /* Vermelho sólido */
+  border-radius: 8px;
+  border: 2.5px solid #f4f4f4;       /* Branco-fumaça */
+  min-height: 60px;
+  transition: background 0.2s, border 0.2s;
+  box-shadow: 0 0 6px #e6000022 inset;
+}
+
+:global(.kpi-form::-webkit-scrollbar-thumb:hover) {
+  background: #b80000;               /* Vermelho escuro no hover */
+  border: 2.5px solid #ececec;       /* Um branco mais fechado ainda */
+}
+
+:global(.kpi-form::-webkit-scrollbar-track) {
+  background: #f7f7f7;               /* Branco mais escuro (fundo da barra) */
+  border-radius: 7px;
+}
       `}
       </style>
     </>
